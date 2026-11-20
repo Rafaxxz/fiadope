@@ -1,0 +1,76 @@
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: fiadope-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/fiadope}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc.time_zone: America/Lima
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    time-zone: America/Lima
+    serialization:
+      write-dates-as-timestamps: false
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 3MB
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+app:
+  zona-horaria: America/Lima
+  jwt:
+    # En producción se DEBE definir JWT_SECRET (mínimo 32 caracteres)
+    secret: ${JWT_SECRET:dev-secret-fiadope-cambiar-en-produccion-0123456789}
+    horas-validez: 8
+  seguridad:
+    max-intentos: 5          # MAX_INTENTOS
+    minutos-bloqueo: 15      # MIN_BLOQUEO
+    minutos-mfa: 5           # VIGENCIA_MFA
+    max-intentos-mfa: 3
+    minutos-inactividad: 15  # MIN_INACTIVIDAD
+  mfa:
+    # true solo en desarrollo: la API devuelve el código MFA para poder probar sin correo
+    mostrar-codigo: ${MFA_DEV_ECHO:true}
+  mail:
+    remitente: ${MAIL_FROM:no-reply@fiadope.pe}
+  cors:
+    origenes: ${CORS_ORIGINS:http://localhost:4200}
+  uploads:
+    directorio: ${UPLOADS_DIR:./uploads}
+  seed:
+    # Carga los juegos de prueba 1 y 2 del informe si la base está vacía
+    habilitado: ${SEED_ENABLED:true}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
