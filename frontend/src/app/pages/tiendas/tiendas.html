@@ -1,0 +1,353 @@
+<div class="flex flex-col w-full">
+  <!-- Barra de contexto -->
+  <div class="w-full bg-surface-container-high py-2 px-gutter lg:px-margin-desktop">
+    <div class="max-w-[1360px] mx-auto flex flex-wrap items-center justify-between gap-space-sm">
+      <div class="flex items-center gap-space-sm text-on-surface-variant font-label-md text-label-md">
+        <span class="flex items-center gap-1 font-label-badge text-label-badge bg-inverse-surface text-tertiary-fixed px-2 py-0.5 rounded-full shadow-sm">
+          <span class="material-symbols-outlined text-[14px]">shield_person</span>MODO SUPERADMIN
+        </span>
+        <span class="hidden md:inline">•</span>
+        <span class="hidden md:inline">Centro de Comando FiadoPe</span>
+        <span class="hidden md:inline">•</span>
+        <span class="font-bold text-on-surface">Red de comercios afiliados: {{ kpi().activas }} activos</span>
+      </div>
+      <button class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-badge text-label-badge uppercase hover:bg-tertiary-fixed-dim transition-all shadow-sm" type="button" (click)="ayuda.set(true)">
+        <span class="material-symbols-outlined text-[16px]">help_center</span>¿Cómo funciona la gestión de tiendas?
+      </button>
+    </div>
+  </div>
+
+  <div class="w-full max-w-[1360px] mx-auto px-gutter lg:px-gutter-desktop py-space-xl flex flex-col gap-space-xl">
+    <!-- Título -->
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg">
+      <div class="flex flex-col gap-space-xs max-w-2xl">
+        <div class="flex items-center gap-space-sm">
+          <span class="font-label-badge text-label-badge px-2.5 py-1 rounded-lg bg-secondary-container text-on-secondary uppercase shadow-sm">MÓDULO PLATAFORMA P03</span>
+          <span class="text-on-surface-variant font-label-md text-label-md">{{ tiendas().length }} tiendas registradas</span>
+        </div>
+        <h1 class="font-headline-lg text-headline-lg md:text-[34px] md:leading-[40px] text-on-surface uppercase tracking-tight">
+          Gestión Central de <span class="text-primary-container">Tiendas y Bodegas</span>
+        </h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">Da de alta o de baja a los negocios que usan FiadoPe y controla el límite global de fiado de cada uno.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-space-md shrink-0">
+        <button class="inline-flex items-center justify-center gap-2 px-space-md py-3.5 rounded-lg bg-surface-container-lowest text-on-surface font-label-lg text-label-lg shadow-md hover:bg-surface-container hover:shadow-lg transition-all" type="button" (click)="exportar()">
+          <span class="material-symbols-outlined text-secondary text-[22px]">download</span><span>Descargar listado (CSV)</span>
+        </button>
+        <button class="inline-flex items-center justify-center gap-2 px-space-lg py-3.5 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm uppercase shadow-lg hover:brightness-110 active:translate-y-0.5 transition-all" type="button" (click)="nueva()">
+          <span class="material-symbols-outlined text-[24px]">add_business</span><span>+ Registrar Nueva Tienda</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+      <div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between">
+        <div class="flex flex-col">
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase">Límite fiado respaldado</span>
+          <span class="font-currency-display text-currency-display text-primary-container">S/ {{ kpi().limite | soles }}</span>
+          <span class="font-label-badge text-[11px] text-tertiary">{{ kpi().pctAsignado.toFixed(1) }}% asignado a clientes</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-primary-fixed/50 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[28px]">payments</span></div>
+      </div>
+      <div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between">
+        <div class="flex flex-col">
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase">Tiendas habilitadas</span>
+          <span class="font-currency-display text-currency-display text-on-surface">{{ kpi().activas }}</span>
+          <span class="font-label-badge text-[11px] text-secondary">{{ kpi().pctActivas.toFixed(1) }}% activas</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-[28px]">store</span></div>
+      </div>
+      <div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between">
+        <div class="flex flex-col">
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase">Vecinos con libreta</span>
+          <span class="font-currency-display text-currency-display text-on-surface">{{ kpi().clientes }}</span>
+          <span class="font-label-badge text-[11px] text-on-surface-variant">Libretas registradas</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center text-on-surface"><span class="material-symbols-outlined text-[28px]">group</span></div>
+      </div>
+      <button type="button" class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between text-left hover:shadow-md transition-shadow" (click)="abrirTopes()" title="Actualizar topes del BCRP">
+        <div class="flex flex-col">
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase">Topes BCRP (TEA)</span>
+          <span class="font-currency-display text-currency-display text-secondary-container">{{ topes() ? (topes()!.teaCompensatoria * 100).toFixed(2) + '%' : '—' }}</span>
+          <span class="font-label-badge text-[11px] text-on-surface-variant">Moratoria {{ topes() ? (topes()!.teaMoratoria * 100).toFixed(2) + '%' : '—' }} · Editar</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-tertiary-fixed/60 flex items-center justify-center text-on-tertiary-fixed"><span class="material-symbols-outlined text-[28px]">gavel</span></div>
+      </button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="p-space-md rounded-xl bg-surface-container-lowest shadow-md flex flex-col lg:flex-row gap-space-md items-stretch lg:items-center justify-between">
+      <div class="relative flex-1 min-w-[240px]">
+        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+        <input class="w-full pl-10 pr-4 py-3 rounded-lg bg-surface-container-low text-on-surface placeholder:text-on-surface-variant/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+               placeholder="Buscar por RUC (11 dígitos) o nombre de tienda..." type="text" [(ngModel)]="q" (keyup.enter)="cargar()" (ngModelChange)="q.length === 0 && cargar()" />
+      </div>
+      <div class="flex flex-wrap items-center gap-space-sm">
+        <div class="flex items-center gap-1.5 bg-surface-container-low rounded-lg px-3 py-2">
+          <span class="material-symbols-outlined text-[18px] text-on-surface-variant">category</span>
+          <label class="font-label-badge text-label-badge text-on-surface-variant uppercase" for="f-giro">Giro:</label>
+          <select id="f-giro" class="bg-transparent font-label-md text-label-md text-on-surface font-semibold focus:outline-none cursor-pointer" [(ngModel)]="giro" (ngModelChange)="cargar()">
+            <option value="">Todos los giros</option>
+            @for (g of giros; track g) { <option [value]="g">{{ g }}</option> }
+          </select>
+        </div>
+        <div class="flex items-center gap-1.5 bg-surface-container-low rounded-lg px-3 py-2">
+          <span class="material-symbols-outlined text-[18px] text-on-surface-variant">tune</span>
+          <label class="font-label-badge text-label-badge text-on-surface-variant uppercase" for="f-estado">Estado:</label>
+          <select id="f-estado" class="bg-transparent font-label-md text-label-md text-on-surface font-semibold focus:outline-none cursor-pointer" [(ngModel)]="estado" (ngModelChange)="cargar()">
+            <option value="">Todos</option><option value="ACTIVA">ACTIVA</option><option value="BAJA">BAJA</option>
+          </select>
+        </div>
+        <button class="px-3 py-2.5 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md" type="button" (click)="cargar()">Buscar</button>
+        <button class="p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors" title="Limpiar filtros" type="button" (click)="limpiar()">
+          <span class="material-symbols-outlined text-[20px]">filter_alt_off</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="w-full bg-surface-container-lowest rounded-xl shadow-lg overflow-hidden flex flex-col">
+      <div class="overflow-x-auto w-full scroll-fino">
+        <table class="w-full text-left border-collapse min-w-[1080px]">
+          <thead>
+            <tr class="bg-surface-container-high text-on-surface uppercase font-headline-sm text-[12px] tracking-wider">
+              <th class="py-3.5 px-4 font-bold"><div class="inline-flex items-center gap-1"><span>RUC / ID FISCAL</span><fp-info titulo="RUC" texto="11 dígitos; empieza con 10 (persona natural) o 20 (empresa). Es el usuario del administrador de la tienda." /></div></th>
+              <th class="py-3.5 px-4 font-bold"><div class="inline-flex items-center gap-1"><span>TIENDA Y PROPIETARIO</span></div></th>
+              <th class="py-3.5 px-4 font-bold">GIRO COMERCIAL</th>
+              <th class="py-3.5 px-4 font-bold">UBICACIÓN</th>
+              <th class="py-3.5 px-4 font-bold text-right"><div class="inline-flex items-center justify-end w-full gap-1"><span>LÍMITE GLOBAL</span><fp-info titulo="Límite global" texto="Monto máximo de fiado que la tienda puede otorgar. La suma de los límites de sus clientes no puede superarlo." /></div></th>
+              <th class="py-3.5 px-4 font-bold text-center">CLIENTES</th>
+              <th class="py-3.5 px-4 font-bold text-center">ESTADO</th>
+              <th class="py-3.5 px-4 font-bold text-right">ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody class="font-body-md text-body-md">
+            @if (cargando()) {
+              <tr><td colspan="8" class="py-10 text-center text-on-surface-variant">Cargando tiendas…</td></tr>
+            }
+            @for (t of visibles(); track t.id; let par = $even) {
+              <tr class="transition-colors" [class]="par ? 'bg-surface-container-lowest hover:bg-surface-container-low' : 'bg-surface-container-low hover:bg-surface-container'" [class.opacity-90]="t.estado === 'BAJA'">
+                <td class="py-4 px-4 font-label-md text-label-md font-bold text-on-surface">
+                  <span class="px-2 py-0.5 rounded bg-surface-container font-mono text-[12px] tracking-wider" [class.line-through]="t.estado === 'BAJA'" [class.text-outline]="t.estado === 'BAJA'">{{ t.ruc }}</span>
+                </td>
+                <td class="py-4 px-4">
+                  <div class="flex flex-col">
+                    <span class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1.5">{{ estilo(t.giro).emoji }} {{ t.razonSocial }}</span>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">person</span> Propietario: {{ t.propietario }}</span>
+                  </div>
+                </td>
+                <td class="py-4 px-4">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-label-md text-label-md" [class]="estilo(t.giro).clase">
+                    <span class="material-symbols-outlined text-[14px]">{{ estilo(t.giro).icono }}</span>{{ t.giro }}
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-on-surface">
+                  <div class="flex items-center gap-1 font-body-sm text-body-sm" [class.text-on-surface-variant]="t.estado === 'BAJA'">
+                    <span class="material-symbols-outlined text-[16px]" [class]="t.estado === 'BAJA' ? 'text-outline' : 'text-primary'">location_on</span>{{ t.ubicacion }}
+                  </div>
+                </td>
+                <td class="py-4 px-4 text-right">
+                  <div class="font-currency-md text-currency-md font-extrabold whitespace-nowrap" [class]="t.estado === 'BAJA' ? 'text-outline line-through' : 'text-on-surface'">S/ {{ t.limiteGlobal | soles }}</div>
+                  @if (t.estado === 'BAJA') { <span class="font-label-badge text-[10px] text-error">Bloqueada por baja</span> }
+                  @else { <span class="font-label-badge text-[10px] text-tertiary">Asignado: {{ usado(t) }}%</span> }
+                </td>
+                <td class="py-4 px-4 text-center">
+                  <span class="inline-block px-3 py-1 rounded-full bg-surface-container font-headline-sm text-headline-sm" [class]="t.estado === 'BAJA' ? 'text-on-surface-variant' : 'text-on-surface'">{{ t.clientes }}</span>
+                </td>
+                <td class="py-4 px-4 text-center">
+                  @if (t.estado === 'ACTIVA') {
+                    <span class="inline-block px-3 py-1 rounded-full bg-[#00C853] text-[#111111] font-label-badge text-label-badge uppercase tracking-wider shadow-sm transform whitespace-nowrap" [class]="par ? '-rotate-1' : 'rotate-1'">★ ACTIVA</span>
+                  } @else {
+                    <span class="inline-block px-3 py-1 rounded-full bg-error text-on-error font-label-badge text-label-badge uppercase tracking-wider shadow-sm transform rotate-2">✕ BAJA</span>
+                  }
+                </td>
+                <td class="py-4 px-4 text-right">
+                  <div class="inline-flex items-center justify-end gap-1.5">
+                    <button class="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-1 transition-colors" title="Ver bitácora de la tienda" type="button" (click)="verBitacora(t)">
+                      <span class="material-symbols-outlined text-[16px]" [class.text-primary]="t.estado === 'ACTIVA'">{{ t.estado === 'ACTIVA' ? 'menu_book' : 'history' }}</span>
+                      <span class="hidden xl:inline">{{ t.estado === 'ACTIVA' ? 'Ver Bitácora' : 'Ver Historial' }}</span>
+                    </button>
+                    @if (t.estado === 'ACTIVA') {
+                      <button class="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-1 transition-colors" title="Editar parámetros" type="button" (click)="editar(t)">
+                        <span class="material-symbols-outlined text-[16px] text-secondary">tune</span><span class="hidden xl:inline">Editar</span>
+                      </button>
+                      <button class="px-2 py-1.5 rounded-lg bg-error-container hover:bg-error hover:text-on-error text-on-error-container font-label-md text-label-md flex items-center gap-1 transition-colors" title="Dar de baja" type="button" (click)="confirmarBaja.set(t)">
+                        <span class="material-symbols-outlined text-[16px]">block</span><span class="hidden 2xl:inline">Baja</span>
+                      </button>
+                    } @else {
+                      <button class="px-3 py-1.5 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed hover:bg-tertiary-fixed-dim font-label-md text-label-md font-bold flex items-center gap-1 transition-colors shadow-sm" title="Reactivar tienda" type="button" (click)="reactivar(t)">
+                        <span class="material-symbols-outlined text-[16px]">restart_alt</span><span>Reactivar Tienda</span>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              @if (!cargando()) { <tr><td colspan="8" class="py-10 text-center text-on-surface-variant">No hay tiendas que coincidan con la búsqueda.</td></tr> }
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="bg-surface-container-high px-space-md py-3 flex flex-col sm:flex-row items-center justify-between gap-space-sm font-label-md text-label-md text-on-surface-variant">
+        <div class="flex items-center gap-2">
+          <span>Mostrando {{ visibles().length }} de {{ tiendas().length }} registros</span>
+          <span class="px-2 py-0.5 rounded bg-surface-container-lowest text-on-surface font-bold">Página {{ pagina() + 1 }} de {{ paginas() }}</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <button class="p-1 rounded bg-surface-container hover:bg-surface-container-lowest text-on-surface disabled:opacity-40" [disabled]="pagina() === 0" (click)="pagina.set(0)"><span class="material-symbols-outlined text-[18px]">first_page</span></button>
+          <button class="p-1 rounded bg-surface-container hover:bg-surface-container-lowest text-on-surface disabled:opacity-40" [disabled]="pagina() === 0" (click)="pagina.set(pagina() - 1)"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+          <span class="px-3 py-1 rounded bg-primary-container text-on-primary font-bold">{{ pagina() + 1 }}</span>
+          <button class="p-1 rounded bg-surface-container hover:bg-surface-container-lowest text-on-surface disabled:opacity-40" [disabled]="pagina() >= paginas() - 1" (click)="pagina.set(pagina() + 1)"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+          <button class="p-1 rounded bg-surface-container hover:bg-surface-container-lowest text-on-surface disabled:opacity-40" [disabled]="pagina() >= paginas() - 1" (click)="pagina.set(paginas() - 1)"><span class="material-symbols-outlined text-[18px]">last_page</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjeta de confianza -->
+    <div class="w-full rounded-2xl bg-surface-container-lowest p-space-lg shadow-md flex flex-col md:flex-row items-center gap-space-lg">
+      <div class="w-full md:w-1/3 aspect-[4/3] rounded-xl overflow-hidden shadow-sm shrink-0">
+        <img class="w-full h-full object-cover" alt="Bodeguero peruano con una tablet en su mostrador" src="assets/img/bodega-tablet.jpg" />
+      </div>
+      <div class="flex flex-col gap-space-sm flex-1">
+        <div class="flex items-center gap-space-xs">
+          <span class="font-label-badge text-label-badge bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded-full uppercase">Garantía de Confianza</span>
+          <span class="font-label-md text-label-md text-on-surface-variant">Normativa peruana</span>
+        </div>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface">Seguridad, transparencia y orden para la confianza de los barrios peruanos</h3>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Cada tienda opera aislada: solo ve a sus propios clientes. Las tasas respetan los topes del BCRP (Ley 31143), los datos personales se tratan con consentimiento (Ley 29733) y cada operación queda en una bitácora inalterable.</p>
+        <div class="flex flex-wrap gap-space-sm mt-space-xs">
+          <span class="inline-flex items-center gap-1 font-label-badge text-[11px] px-2.5 py-1 rounded-md bg-surface-container-high text-on-surface"><span class="material-symbols-outlined text-[14px] text-primary">verified_user</span> Doble verificación (MFA)</span>
+          <span class="inline-flex items-center gap-1 font-label-badge text-[11px] px-2.5 py-1 rounded-md bg-surface-container-high text-on-surface"><span class="material-symbols-outlined text-[14px] text-secondary">security_update_good</span> Respaldo diario cifrado</span>
+          <span class="inline-flex items-center gap-1 font-label-badge text-[11px] px-2.5 py-1 rounded-md bg-surface-container-high text-on-surface"><span class="material-symbols-outlined text-[14px] text-tertiary">gavel</span> Topes BCRP vigentes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal registrar / editar tienda -->
+@if (modal()) {
+  <div class="fixed inset-0 z-[60] bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4" (click)="modal.set(null)">
+    <div class="w-full max-w-lg bg-surface-container-lowest rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]" (click)="$event.stopPropagation()">
+      <div class="h-2 w-full chicha-gradient"></div>
+      <div class="p-space-lg flex items-center justify-between bg-surface-container-low">
+        <div class="flex items-center gap-space-sm">
+          <div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary flex items-center justify-center"><span class="material-symbols-outlined text-[24px]">add_business</span></div>
+          <div class="flex flex-col">
+            <h3 class="font-headline-sm text-headline-sm text-on-surface">{{ modal() === 'nueva' ? 'Registrar Nueva Tienda' : 'Editar Tienda' }}</h3>
+            <span class="font-label-badge text-label-badge text-on-surface-variant uppercase">Afiliación de comercio</span>
+          </div>
+        </div>
+        <button class="p-1 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface" type="button" (click)="modal.set(null)"><span class="material-symbols-outlined text-[24px]">close</span></button>
+      </div>
+      <form class="p-space-lg flex flex-col gap-space-md overflow-y-auto" (ngSubmit)="guardar()" novalidate>
+        @if (errorForm()) { <p class="p-2 rounded-lg bg-error-container text-on-error-container font-body-sm text-body-sm font-semibold">{{ errorForm() }}</p> }
+        <div class="flex flex-col gap-1">
+          <label class="font-label-md text-label-md text-on-surface font-bold flex items-center">RUC de la tienda (11 dígitos): <fp-info titulo="RUC" texto="11 dígitos; empieza con 10 (persona natural) o 20 (empresa). Ej.: 10458792011." /></label>
+          <input class="campo font-mono" [class.invalido]="errores()['ruc']" maxlength="11" inputmode="numeric" placeholder="Ej. 10458792011" name="ruc" [(ngModel)]="form.ruc" [readonly]="modal() === 'editar'" />
+          @if (errores()['ruc']) { <p class="error-campo">{{ errores()['ruc'] }}</p> }
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-label-md text-label-md text-on-surface font-bold">Nombre comercial:</label>
+          <input class="campo" [class.invalido]="errores()['razonSocial']" placeholder="Ej. Bodega La Esquina Criolla" name="razonSocial" [(ngModel)]="form.razonSocial" maxlength="120" />
+          @if (errores()['razonSocial']) { <p class="error-campo">{{ errores()['razonSocial'] }}</p> }
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-label-md text-label-md text-on-surface font-bold">Propietario:</label>
+          <input class="campo" [class.invalido]="errores()['propietario']" placeholder="Ej. Luis Torres Huamán" name="propietario" [(ngModel)]="form.propietario" maxlength="100" />
+          @if (errores()['propietario']) { <p class="error-campo">{{ errores()['propietario'] }}</p> }
+        </div>
+        <div class="grid grid-cols-2 gap-space-sm">
+          <div class="flex flex-col gap-1">
+            <label class="font-label-md text-label-md text-on-surface font-bold">Giro de negocio:</label>
+            <select class="campo" name="giro" [(ngModel)]="form.giro">@for (g of giros; track g) { <option [value]="g">{{ g }}</option> }</select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="font-label-md text-label-md text-on-surface font-bold">Límite fiado (S/):</label>
+            <input class="campo font-mono" [class.invalido]="errores()['limiteGlobal']" placeholder="20000" type="number" min="1" step="0.01" name="limiteGlobal" [(ngModel)]="form.limiteGlobal" />
+            @if (errores()['limiteGlobal']) { <p class="error-campo">{{ errores()['limiteGlobal'] }}</p> }
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-space-sm">
+          <div class="flex flex-col gap-1">
+            <label class="font-label-md text-label-md text-on-surface font-bold">Distrito / ubicación:</label>
+            <input class="campo" [class.invalido]="errores()['ubicacion']" placeholder="Ej. Los Olivos" name="ubicacion" [(ngModel)]="form.ubicacion" maxlength="60" />
+            @if (errores()['ubicacion']) { <p class="error-campo">{{ errores()['ubicacion'] }}</p> }
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="font-label-md text-label-md text-on-surface font-bold">Teléfono:</label>
+            <input class="campo font-mono" [class.invalido]="errores()['telefono']" placeholder="987654321" maxlength="9" inputmode="numeric" name="telefono" [(ngModel)]="form.telefono" />
+            @if (errores()['telefono']) { <p class="error-campo">{{ errores()['telefono'] }}</p> }
+          </div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-label-md text-label-md text-on-surface font-bold">Dirección:</label>
+          <input class="campo" [class.invalido]="errores()['direccion']" placeholder="Ej. Jr. Los Pinos 245" name="direccion" [(ngModel)]="form.direccion" maxlength="150" />
+          @if (errores()['direccion']) { <p class="error-campo">{{ errores()['direccion'] }}</p> }
+        </div>
+        @if (modal() === 'nueva') {
+          <div class="p-3 rounded-xl bg-surface-container flex flex-col gap-space-sm">
+            <p class="font-label-badge text-label-badge uppercase text-on-surface-variant">Acceso del administrador (usuario = RUC)</p>
+            <div class="flex flex-col gap-1">
+              <label class="font-label-md text-label-md text-on-surface font-bold flex items-center">Correo para el código MFA: <fp-info titulo="Correo" texto="Aquí llegará el código de 6 dígitos cada vez que ingrese. Debe ser único." /></label>
+              <input class="campo" [class.invalido]="errores()['adminEmail']" type="email" placeholder="bodega@correo.com" name="adminEmail" [(ngModel)]="form.adminEmail" maxlength="100" />
+              @if (errores()['adminEmail']) { <p class="error-campo">{{ errores()['adminEmail'] }}</p> }
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="font-label-md text-label-md text-on-surface font-bold">Contraseña inicial:</label>
+              <input class="campo" [class.invalido]="errores()['adminClave']" type="password" placeholder="Mín. 8, mayúscula, número y símbolo" name="adminClave" [(ngModel)]="form.adminClave" autocomplete="new-password" />
+              @if (errores()['adminClave']) { <p class="error-campo">{{ errores()['adminClave'] }}</p> }
+            </div>
+          </div>
+        }
+        <div class="flex justify-end gap-space-sm mt-space-sm pt-space-sm">
+          <button class="px-space-md py-2.5 rounded-lg bg-surface-container text-on-surface font-label-lg text-label-lg" type="button" (click)="modal.set(null)">Cancelar</button>
+          <button class="px-space-lg py-2.5 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm uppercase shadow-md hover:brightness-110 disabled:opacity-60" type="submit" [disabled]="guardando()">{{ guardando() ? 'Guardando…' : (modal() === 'nueva' ? 'Guardar Afiliación' : 'Guardar Cambios') }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Confirmar baja -->
+@if (confirmarBaja(); as t) {
+  <div class="fixed inset-0 z-[60] bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4" (click)="confirmarBaja.set(null)">
+    <div class="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-2xl overflow-hidden" (click)="$event.stopPropagation()">
+      <div class="h-2 w-full bg-error"></div>
+      <div class="p-space-lg flex flex-col gap-space-md">
+        <h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-error">block</span>¿Dar de baja {{ t.razonSocial }}?</h3>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Sus usuarios (administrador y vecinos) ya no podrán ingresar y sus sesiones se cerrarán ahora. Los saldos se conservan y puedes reactivarla después.</p>
+        <div class="flex justify-end gap-space-sm">
+          <button class="px-space-md py-2.5 rounded-lg bg-surface-container text-on-surface font-label-lg text-label-lg" type="button" (click)="confirmarBaja.set(null)">Cancelar</button>
+          <button class="px-space-lg py-2.5 rounded-lg bg-error text-on-error font-headline-sm text-headline-sm uppercase shadow-md" type="button" (click)="darDeBaja(t)">Dar de baja</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Topes BCRP -->
+@if (editTopes()) {
+  <div class="fixed inset-0 z-[60] bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4" (click)="editTopes.set(false)">
+    <div class="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-2xl overflow-hidden" (click)="$event.stopPropagation()">
+      <div class="h-2 w-full chicha-gradient"></div>
+      <div class="p-space-lg flex flex-col gap-space-md">
+        <h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-tertiary">gavel</span>Topes del BCRP (semestre vigente)</h3>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Circular N.° 0008-2021-BCRP: la tasa moratoria máxima es el 15 % de la compensatoria. Actualízalos en mayo y noviembre.</p>
+        <div class="grid grid-cols-2 gap-space-sm">
+          <label class="flex flex-col gap-1"><span class="font-label-md text-label-md font-bold">TEA compensatoria (%)</span><input class="campo font-mono" type="number" step="0.01" [(ngModel)]="topeComp" /></label>
+          <label class="flex flex-col gap-1"><span class="font-label-md text-label-md font-bold">TEA moratoria (%)</span><input class="campo font-mono" type="number" step="0.01" [(ngModel)]="topeMor" /></label>
+        </div>
+        <div class="flex justify-end gap-space-sm">
+          <button class="px-space-md py-2.5 rounded-lg bg-surface-container text-on-surface font-label-lg text-label-lg" type="button" (click)="editTopes.set(false)">Cancelar</button>
+          <button class="px-space-lg py-2.5 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm uppercase shadow-md" type="button" (click)="guardarTopes()">Guardar topes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (ayuda()) {
+  <fp-ayuda titulo="Guía Superadmin: Tiendas" subtitulo="Módulo de administración central" [pasos]="ayudaTiendas.pasos" boton="Entendido, volver a la tabla" (cerrar)="ayuda.set(false)" />
+}

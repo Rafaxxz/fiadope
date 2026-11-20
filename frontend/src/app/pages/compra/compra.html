@@ -1,0 +1,253 @@
+@let s = sim();
+@let c = clienteSel();
+@let p = productoSel();
+<div class="w-full max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md">
+  <div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-md bg-surface-container-lowest p-space-md rounded-xl shadow-sm">
+    <div class="flex items-center gap-space-sm">
+      <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary-container text-on-primary-container shadow-sm"><span class="material-symbols-outlined">add_shopping_cart</span></span>
+      <div class="flex flex-col">
+        <div class="flex items-center gap-space-xs">
+          <span class="font-label-badge text-label-badge bg-secondary-container text-on-secondary px-2 py-0.5 rounded-full uppercase tracking-wider">Módulo Mostrador P07</span>
+          <span class="font-body-sm text-[12px] text-on-surface-variant font-medium">Vista previa antes de confirmar</span>
+        </div>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight uppercase">Registrar Nueva Compra Fiada</h1>
+      </div>
+    </div>
+    <button class="inline-flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed font-label-md text-label-md hover:bg-tertiary-fixed-dim transition-all shadow-sm" type="button" (click)="ayuda.set(true)">
+      <span class="material-symbols-outlined text-[18px]">help</span><span>¿Cómo funciona la nueva compra?</span>
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+    <section class="lg:col-span-7 flex flex-col gap-space-md">
+      <!-- 1. Cliente -->
+      <div class="bg-surface-container-lowest p-space-md sm:p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+        <div class="flex items-center justify-between">
+          <label class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2" for="cliente-search"><span class="material-symbols-outlined text-primary text-[22px]">person_search</span>1. Cliente Titular</label>
+          @if (c) { <span class="font-label-badge text-label-badge uppercase" [class]="c.enMora ? 'text-error' : 'text-on-surface-variant'">{{ c.enMora ? 'Con mora de ' + c.diasMora + ' días' : 'Récord puntual' }}</span> }
+        </div>
+        <div class="relative w-full">
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline">search</span>
+          <input id="cliente-search" class="w-full h-12 pl-11 pr-12 rounded-lg bg-surface-container text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary-container transition-all"
+                 placeholder="Buscar por DNI o nombre del vecino..." type="text" autocomplete="off" [ngModel]="qCliente()" (ngModelChange)="qCliente.set($event); abiertoCliente.set(true)" (focus)="abiertoCliente.set(true)" (blur)="cerrarListas()" />
+          @if (c) {
+            <a [routerLink]="['/clientes', c.id]" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded flex items-center justify-center bg-surface-container-high text-on-surface hover:bg-primary hover:text-on-primary transition-colors" title="Ver ficha de cliente"><span class="material-symbols-outlined text-[18px]">badge</span></a>
+          }
+          @if (abiertoCliente()) {
+            <div class="absolute z-30 left-0 right-0 top-[52px] bg-surface-container-lowest rounded-lg shadow-[3px_4px_0px_#1c1b1b] overflow-hidden max-h-72 overflow-y-auto">
+              @for (x of clientesFiltrados(); track x.id) {
+                <button type="button" class="w-full flex items-center justify-between gap-2 px-3 py-2.5 hover:bg-surface-container text-left" (mousedown)="elegirCliente(x)">
+                  <span class="flex items-center gap-2"><span class="w-8 h-8 rounded-full bg-primary-fixed text-on-primary-fixed font-headline-sm text-[12px] flex items-center justify-center">{{ x.nombres | iniciales }}</span><span><span class="block font-label-lg text-label-lg">{{ x.nombres }}</span><span class="block font-body-sm text-[12px] text-on-surface-variant">DNI {{ x.dni }}</span></span></span>
+                  <span class="font-label-md text-label-md text-secondary">Libre S/ {{ x.creditoLibre | soles }}</span>
+                </button>
+              } @empty { <p class="px-3 py-3 text-on-surface-variant font-body-sm text-body-sm">Sin coincidencias. <a routerLink="/clientes/nuevo" class="text-primary font-bold">Registrar cliente</a></p> }
+            </div>
+          }
+        </div>
+        @if (c) {
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm p-space-md bg-surface-container rounded-lg">
+            <div class="flex items-center gap-space-sm">
+              <div class="w-12 h-12 rounded-full shadow-sm ring-2 ring-primary-container shrink-0 bg-primary-fixed text-on-primary-fixed font-headline-sm text-headline-sm flex items-center justify-center">{{ c.nombres | iniciales }}</div>
+              <div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">{{ c.nombres }}</span><span class="font-body-sm text-body-sm text-on-surface-variant">{{ c.direccion }}</span></div>
+            </div>
+            <div class="flex flex-col items-end shrink-0 bg-surface-container-lowest px-space-md py-2 rounded-lg shadow-sm">
+              <span class="font-label-badge text-label-badge text-on-surface-variant uppercase tracking-wider">Crédito Disponible</span>
+              <div class="flex items-baseline gap-1"><span class="font-currency-md text-currency-md text-secondary-container">S/ {{ c.creditoLibre | soles }}</span><span class="font-body-sm text-[12px] text-on-surface-variant">/ S/ {{ c.limite | soles }}</span></div>
+            </div>
+          </div>
+          <div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden"><div class="bg-secondary-container h-full rounded-full" [style.width.%]="100 - c.usoPorcentaje"></div></div>
+          <div class="flex justify-between items-center text-[12px] text-on-surface-variant font-label-md px-1">
+            <span>Utilizado: S/ {{ c.deudaVigente | soles }} ({{ c.usoPorcentaje }}%)</span>
+            <span class="text-secondary font-bold">Disponible: {{ (100 - c.usoPorcentaje).toFixed(1) }}%</span>
+          </div>
+        }
+      </div>
+
+      <!-- 2. Producto -->
+      <div class="bg-surface-container-lowest p-space-md sm:p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+        <div class="flex items-center justify-between">
+          <label class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[22px]">inventory_2</span>2. Detalle del Producto o Mercadería</label>
+          <a routerLink="/catalogo" class="font-label-md text-label-md text-primary hover:underline inline-flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">menu_book</span> Ver Catálogo</a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-space-md">
+          <div class="sm:col-span-8 flex flex-col gap-1 relative">
+            <label class="font-label-md text-label-md text-on-surface-variant" for="glosa-producto">Producto del catálogo</label>
+            <input id="glosa-producto" class="w-full h-12 px-space-md rounded-lg bg-surface-container text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container focus:outline-none"
+                   placeholder="Buscar por nombre o SKU..." autocomplete="off" [ngModel]="qProducto()" (ngModelChange)="qProducto.set($event); abiertoProducto.set(true)" (focus)="abiertoProducto.set(true)" (blur)="cerrarListas()" />
+            @if (abiertoProducto()) {
+              <div class="absolute z-30 left-0 right-0 top-[76px] bg-surface-container-lowest rounded-lg shadow-[3px_4px_0px_#1c1b1b] overflow-hidden max-h-72 overflow-y-auto">
+                @for (x of productosFiltrados(); track x.id) {
+                  <button type="button" class="w-full flex items-center gap-3 px-3 py-2 hover:bg-surface-container text-left" (mousedown)="elegirProducto(x)">
+                    <fp-producto-img class="w-10 h-10 rounded shrink-0" [url]="x.imagenUrl" [categoria]="x.categoria" [tamano]="20" />
+                    <span class="flex-1"><span class="block font-label-lg text-label-lg">{{ x.nombre }}</span><span class="block font-body-sm text-[12px] text-on-surface-variant">SKU {{ x.sku }} · {{ x.permiteFinMes ? 'Fin de mes' : '' }}{{ x.permiteFinMes && x.permiteCuotas ? ' · ' : '' }}{{ x.permiteCuotas ? 'Cuotas' : '' }}</span></span>
+                    <span class="font-label-md text-label-md text-secondary">S/ {{ x.precioLista | soles }}</span>
+                  </button>
+                } @empty { <p class="px-3 py-3 text-on-surface-variant font-body-sm text-body-sm">Sin coincidencias en el catálogo activo.</p> }
+              </div>
+            }
+            @if (p) { <span class="font-body-sm text-[12px] text-on-surface-variant">SKU: {{ p.sku }} • Precio de lista S/ {{ p.precioLista | soles }} (contado S/ {{ p.precioContado | soles }})</span> }
+          </div>
+          <div class="sm:col-span-4 flex flex-col gap-1">
+            <label class="font-label-md text-label-md text-on-surface-variant flex items-center" for="cantidad">Cantidad <fp-info titulo="Cantidad" texto="Unidades o peso comprado (hasta 3 decimales). El capital C = precio de lista × cantidad." /></label>
+            <input id="cantidad" class="w-full h-12 px-space-md rounded-lg bg-surface-container text-on-surface font-currency-md text-currency-md text-right focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container focus:outline-none"
+                   type="number" min="0.001" step="0.001" [ngModel]="cantidad()" (ngModelChange)="cantidad.set($event); simular()" />
+            <span class="font-body-sm text-[12px] text-primary text-right font-medium">Capital C = S/ {{ capital() | soles }}</span>
+          </div>
+          <div class="sm:col-span-12 flex flex-col gap-1">
+            <label class="font-label-md text-label-md text-on-surface-variant flex items-center" for="fecha">Fecha y hora de la compra <fp-info titulo="Fecha de la compra" texto="Por defecto es ahora. Puedes registrar una compra anterior, pero no una fecha futura." /></label>
+            <input id="fecha" class="w-full sm:w-72 h-12 px-space-md rounded-lg bg-surface-container text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container focus:outline-none"
+                   type="datetime-local" [max]="maxFecha" [ngModel]="fechaHora()" (ngModelChange)="fechaHora.set($event); simular()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Modalidad -->
+      <div class="bg-surface-container-lowest p-space-md sm:p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+        <div class="flex items-center justify-between">
+          <span class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[22px]">handshake</span>3. Modalidad de Pago <fp-info titulo="Modalidad de pago" texto="Fin de mes: paga todo en la próxima fecha de pago. Cuotas: paga en cuotas mensuales iguales (método francés)." /></span>
+          <span class="font-label-badge text-label-badge bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded-full uppercase">Pacto Vecinal</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm" role="radiogroup" aria-label="Modalidad de fiado">
+          @for (m of ['FIN_DE_MES', 'CUOTAS']; track m) {
+            @let activa = modalidad() === m;
+            @let permitida = !p || (m === 'CUOTAS' ? p.permiteCuotas : p.permiteFinMes);
+            <button type="button" role="radio" [attr.aria-checked]="activa" [disabled]="!permitida" (click)="setModalidad($any(m))"
+                    class="h-16 px-space-md rounded-lg flex items-center justify-between text-left transition-all p-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                    [class]="activa ? 'bg-primary text-on-primary shadow-sm' : 'bg-surface-container hover:bg-surface-container-high text-on-surface'">
+              <div class="flex items-center gap-space-sm">
+                <span class="material-symbols-outlined">{{ m === 'CUOTAS' ? 'calendar_month' : 'event' }}</span>
+                <div class="flex flex-col">
+                  <span class="font-headline-sm text-[16px] leading-tight">{{ m === 'CUOTAS' ? 'En Cuotas Mensuales' : 'Fin de Mes' }}</span>
+                  <span class="font-body-sm text-[12px]" [class]="activa ? 'text-primary-fixed' : 'text-on-surface-variant'">{{ !permitida ? 'No permitido para este producto' : (m === 'CUOTAS' ? 'Fórmula francesa con gracia' : 'Paga todo en su fecha de pago') }}</span>
+                </div>
+              </div>
+              <div class="w-6 h-6 rounded-full flex items-center justify-center" [class]="activa ? 'bg-surface-container-lowest text-primary' : 'bg-surface-container-high'">
+                @if (activa) { <span class="material-symbols-outlined text-[16px]">check</span> }
+              </div>
+            </button>
+          }
+        </div>
+        @if (modalidad() === 'CUOTAS') {
+          <div class="flex flex-col gap-space-xs mt-space-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-label-md text-label-md text-on-surface-variant">Cantidad de cuotas mensuales:</span>
+              @if (c) { <span class="font-body-sm text-[12px] text-secondary font-bold">Máximo del cliente: {{ maxCuotas() }} cuotas</span> }
+            </div>
+            <div class="grid grid-cols-4 sm:grid-cols-6 gap-space-sm">
+              @for (n of pastillas(); track n) {
+                <button type="button" class="py-3 rounded-lg font-headline-sm text-headline-sm transition-all flex flex-col items-center justify-center relative disabled:opacity-35 disabled:cursor-not-allowed"
+                        [class]="nCuotas() === n ? 'bg-secondary-container text-on-secondary shadow-sm' : 'bg-surface-container hover:bg-surface-container-high text-on-surface'"
+                        [disabled]="n > maxCuotas()" (click)="setCuotas(n)" [title]="n > maxCuotas() ? 'Supera el plazo máximo del cliente' : ''">
+                  @if (nCuotas() === n) { <span class="absolute -top-2 right-2 bg-tertiary-fixed text-on-tertiary-fixed font-label-badge text-[9px] px-1.5 rounded-full uppercase">Elegido</span> }
+                  <span>{{ n }}</span><span class="font-body-sm text-[11px] font-normal">cuotas</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Simulación -->
+    <aside class="lg:col-span-5 flex flex-col gap-space-md lg:sticky lg:top-24">
+      <div class="bg-[#FFFDE7] rounded-xl shadow-md p-space-md sm:p-space-lg flex flex-col gap-space-md relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-2 bg-primary-container"></div>
+        <div class="flex items-center justify-between pt-1">
+          <div class="flex flex-col">
+            <span class="font-label-badge text-label-badge text-secondary uppercase tracking-wider">Cálculo Transparente</span>
+            <h2 class="font-headline-sm text-headline-sm text-on-surface">Simulación Financiera Inmediata</h2>
+          </div>
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container text-on-secondary font-headline-sm text-headline-sm">{{ calculando() ? '…' : '%' }}</span>
+        </div>
+        @if (!s) {
+          <div class="p-space-md bg-surface-container-lowest/80 rounded-lg text-center font-body-sm text-body-sm text-on-surface-variant">
+            @if (errorSim()) { <span class="text-error font-semibold">{{ errorSim() }}</span> }
+            @else { Elige el cliente y el producto para ver el cálculo antes de confirmar. }
+          </div>
+        } @else {
+          <div class="p-space-sm bg-surface-container-lowest/80 rounded-lg flex items-center justify-between font-label-md text-label-md">
+            <span class="text-on-surface-variant">Método:</span>
+            <span class="text-on-surface font-bold uppercase">{{ s.modalidad === 'CUOTAS' ? 'Francés vencido con gracia total' : 'Interés compuesto diario' }}</span>
+          </div>
+          @if (s.excedeLimite) {
+            <div class="p-space-sm rounded-lg bg-error text-on-error flex items-center gap-2 font-label-lg text-label-lg" role="alert"><span class="material-symbols-outlined">block</span>{{ s.mensaje }}</div>
+          }
+          <div class="grid grid-cols-2 gap-space-sm bg-surface-container-lowest p-space-md rounded-lg shadow-sm">
+            <div class="flex flex-col"><span class="font-body-sm text-[12px] text-on-surface-variant">Fecha de compra:</span><span class="font-headline-sm text-[16px] text-on-surface">{{ s.fechaCompra | fecha }}</span><span class="font-body-sm text-[11px] text-on-surface-variant">Corte del {{ s.fechaCorte | fecha: true }}</span></div>
+            <div class="flex flex-col"><span class="font-body-sm text-[12px] text-on-surface-variant">{{ s.modalidad === 'CUOTAS' ? 'Fin de la gracia:' : 'Fecha de pago:' }}</span><span class="font-headline-sm text-[16px] text-primary">{{ s.fechaPago | fecha }}</span><span class="font-body-sm text-[11px] text-primary font-medium">{{ s.despuesDelCorte ? 'Compra después del corte: pasa al mes siguiente' : 'Día de pago del cliente' }}</span></div>
+          </div>
+          @if (s.modalidad === 'FIN_DE_MES') {
+            <div class="grid grid-cols-2 gap-space-sm">
+              <div class="p-space-sm bg-surface-container-lowest rounded-lg shadow-sm flex flex-col"><span class="font-body-sm text-[11px] text-on-surface-variant uppercase">Días comerciales:</span><span class="font-headline-sm text-headline-sm text-on-surface">{{ s.dias }} días</span><span class="font-body-sm text-[10px] text-on-surface-variant">Meses de 30 días</span></div>
+              <div class="p-space-sm bg-surface-container-lowest rounded-lg shadow-sm flex flex-col"><span class="font-body-sm text-[11px] text-on-surface-variant uppercase">Tasa compensatoria:</span><span class="font-headline-sm text-headline-sm text-secondary">TEA {{ s.teaPorcentaje.toFixed(2) }} %</span><span class="font-body-sm text-[10px] text-on-surface-variant">TED {{ s.tedPorcentaje.toFixed(7) }} %</span></div>
+            </div>
+            <div class="bg-primary text-on-primary p-space-md rounded-xl shadow-md flex flex-col items-center justify-center text-center">
+              <span class="font-label-badge text-label-badge uppercase tracking-wider text-primary-fixed">Monto a pagar el {{ s.fechaPago | fecha }}</span>
+              <div class="flex items-baseline justify-center gap-1 my-1"><span class="font-currency-display text-currency-display text-on-primary">S/ {{ s.montoS | soles }}</span></div>
+              <div class="flex items-center gap-2 bg-surface-container-lowest/20 px-space-md py-1 rounded-full text-[12px] font-label-md"><span>Capital S/ {{ s.capital | soles }} + interés S/ {{ s.interes | soles }}</span></div>
+            </div>
+            <div class="p-space-sm bg-tertiary-fixed/30 rounded-lg flex items-start gap-space-sm">
+              <span class="material-symbols-outlined text-on-tertiary-fixed">record_voice_over</span>
+              <p class="font-body-sm text-[13px] text-on-tertiary-fixed leading-snug"><strong>Explicación para el cliente:</strong> "{{ s.cliente.split(' ')[0] }}, llevas {{ s.producto }} hoy y pagas S/ {{ s.montoS | soles }} el {{ s.fechaPago | fecha }}: son {{ s.dias }} días de interés."</p>
+            </div>
+          } @else {
+            <div class="flex items-start gap-space-sm p-space-sm rounded-lg bg-surface-container-lowest shadow-sm">
+              <span class="material-symbols-outlined text-tertiary">hourglass_top</span>
+              <div class="flex flex-col">
+                <div class="flex items-center gap-2"><span class="font-label-md text-label-md text-on-surface">Días de gracia total:</span><span class="font-label-badge text-label-badge bg-tertiary-fixed text-on-tertiary-fixed px-1.5 py-0.5 rounded">{{ s.dias }} Días</span></div>
+                <p class="font-body-sm text-[12px] text-on-surface-variant mt-0.5 leading-snug">Del {{ s.fechaCompra | fecha: true }} al {{ s.fechaPago | fecha: true }}. Los intereses de estos días se suman al capital antes de calcular la cuota.</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-space-sm">
+              <div class="p-space-sm bg-surface-container-lowest rounded-lg shadow-sm flex flex-col"><span class="font-body-sm text-[11px] text-on-surface-variant uppercase flex items-center">Capital ajustado (C') <fp-info titulo="Capital ajustado (C')" texto="Precio de la compra más los intereses de los días de gracia. Sobre este monto se calculan las cuotas." /></span><span class="font-headline-sm text-headline-sm text-on-surface">S/ {{ s.capitalAjustado | soles }}</span><span class="font-body-sm text-[10px] text-on-surface-variant">+ S/ {{ s.interes | soles }} gracia {{ s.dias }}d</span></div>
+              <div class="p-space-sm bg-surface-container-lowest rounded-lg shadow-sm flex flex-col"><span class="font-body-sm text-[11px] text-on-surface-variant uppercase">Tasa compensatoria:</span><span class="font-headline-sm text-headline-sm text-secondary">TEA {{ s.teaPorcentaje.toFixed(2) }} %</span><span class="font-body-sm text-[10px] text-on-surface-variant">TEM {{ s.temPorcentaje.toFixed(5) }} %</span></div>
+            </div>
+            <div class="bg-primary text-on-primary p-space-md rounded-xl shadow-md flex flex-col items-center justify-center text-center">
+              <span class="font-label-badge text-label-badge uppercase tracking-wider text-primary-fixed">Cuota Mensual Fija a Cobrar</span>
+              <div class="flex items-baseline justify-center gap-1 my-1"><span class="font-currency-display text-currency-display text-on-primary">S/ {{ s.cuota | soles }}</span><span class="font-body-sm text-primary-fixed">/ mes</span></div>
+              <div class="flex items-center gap-2 bg-surface-container-lowest/20 px-space-md py-1 rounded-full text-[12px] font-label-md"><span>Total venta a plazo: S/ {{ s.totalVentaPlazo | soles }} (en {{ s.nCuotas }} cuotas)</span></div>
+            </div>
+            <div class="bg-surface-container-lowest rounded-lg p-space-sm shadow-sm flex flex-col gap-1">
+              <span class="font-label-badge text-label-badge text-on-surface-variant px-1 uppercase tracking-wider">Cronograma de Vencimientos</span>
+              @for (f of s.cronograma; track f.numero; let first = $first) {
+                <div class="flex items-center justify-between py-1.5 px-2 rounded font-body-sm text-body-sm" [class]="first ? 'bg-surface-container-low' : 'bg-surface-container-lowest'">
+                  <div class="flex items-center gap-2"><span class="w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center" [class]="first ? 'bg-secondary text-on-secondary' : 'bg-surface-container-high text-on-surface-variant'">{{ f.numero }}</span><span class="text-on-surface font-medium">Cuota {{ f.numero }}: {{ f.vencimiento | fecha }}</span></div>
+                  <span class="font-bold text-on-surface">S/ {{ f.cuota | soles }}</span>
+                </div>
+              }
+            </div>
+            <div class="p-space-sm bg-tertiary-fixed/30 rounded-lg flex items-start gap-space-sm">
+              <span class="material-symbols-outlined text-on-tertiary-fixed">record_voice_over</span>
+              <p class="font-body-sm text-[13px] text-on-tertiary-fixed leading-snug"><strong>Explicación para el cliente:</strong> "{{ s.cliente.split(' ')[0] }}, llevas {{ s.producto }} hoy y pagas {{ s.nCuotas }} cuotas de S/ {{ s.cuota | soles }} desde el {{ s.cronograma[0]?.vencimiento | fecha }}."</p>
+            </div>
+          }
+        }
+      </div>
+    </aside>
+  </div>
+
+    <div class="w-full mt-space-lg bg-surface-container-lowest p-space-md rounded-xl shadow-md flex flex-col sm:flex-row items-center justify-between gap-space-md">
+      <a routerLink="/panel" class="w-full sm:w-auto py-3 px-space-lg rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-headline-sm text-[15px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors"><span class="material-symbols-outlined">close</span>Cancelar Operación</a>
+      <div class="flex flex-col sm:flex-row items-center gap-space-sm w-full sm:w-auto">
+        @if (s) {
+          <div class="text-right hidden md:flex flex-col">
+            <span class="font-label-md text-label-md text-on-surface-variant">{{ s.modalidad === 'CUOTAS' ? 'Total venta a plazo:' : 'Total a pagar:' }}</span>
+            <span class="font-headline-sm text-headline-sm text-primary">S/ {{ s.totalVentaPlazo | soles }}</span>
+          </div>
+        }
+        <button class="w-full sm:w-auto min-h-[54px] px-space-xl rounded-lg bg-primary-container hover:bg-primary text-on-primary-container font-headline-md text-headline-md uppercase tracking-tight shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button" [disabled]="!s || s.excedeLimite || guardando() || calculando()" (click)="confirmar()">
+          <span class="material-symbols-outlined">task_alt</span><span>{{ guardando() ? 'Registrando…' : 'Confirmar Compra Fiada' }}</span>
+        </button>
+      </div>
+    </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md mt-space-lg">
+    <div class="p-space-md bg-surface-container-lowest rounded-xl shadow-sm flex items-start gap-space-sm"><span class="material-symbols-outlined text-primary">visibility</span><div class="flex flex-col"><span class="font-headline-sm text-[15px] text-on-surface">Transparencia Total</span><p class="font-body-sm text-[13px] text-on-surface-variant">Sin cobros ocultos: el vecino ve el cálculo antes de aceptar y la compra queda registrada en la bitácora.</p></div></div>
+    <div class="p-space-md bg-surface-container-lowest rounded-xl shadow-sm flex items-start gap-space-sm"><span class="material-symbols-outlined text-secondary">lock_clock</span><div class="flex flex-col"><span class="font-headline-sm text-[15px] text-on-surface">Tasa congelada</span><p class="font-body-sm text-[13px] text-on-surface-variant">La tasa de esta compra queda fija: si luego cambian las condiciones del cliente, solo afectan compras futuras.</p></div></div>
+    <div class="p-space-md bg-surface-container-lowest rounded-xl shadow-sm flex items-start gap-space-sm"><span class="material-symbols-outlined text-tertiary">shield</span><div class="flex flex-col"><span class="font-headline-sm text-[15px] text-on-surface">Crédito Responsable</span><p class="font-body-sm text-[13px] text-on-surface-variant">@if (s) { La compra consume S/ {{ s.capital | soles }} de S/ {{ s.creditoDisponible | soles }} disponibles. } @else { Ninguna compra puede superar el crédito disponible del cliente. }</p></div></div>
+  </div>
+</div>
+@if (ayuda()) {
+  <fp-ayuda titulo="¿Cómo registrar un fiado?" subtitulo="Guía práctica de mostrador" [pasos]="ayudaCompra.pasos" boton="¡Entendido, volver al mostrador!" (cerrar)="ayuda.set(false)" />
+}

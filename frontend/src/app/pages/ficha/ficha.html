@@ -1,0 +1,373 @@
+@let f = ficha();
+<div class="w-full max-w-[1360px] mx-auto px-gutter lg:px-gutter-desktop py-space-lg flex flex-col gap-space-lg">
+  <!-- Cabecera -->
+  <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md bg-surface-container-lowest p-space-md rounded-xl shadow-sm">
+    <div class="flex items-center gap-space-sm">
+      <a routerLink="/clientes" class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors" title="Volver a clientes"><span class="material-symbols-outlined">arrow_back</span></a>
+      <div class="flex flex-col">
+        <div class="flex items-center gap-space-xs">
+          <span class="font-label-badge text-label-badge bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full uppercase">P06 • Expediente Vecinal</span>
+          @if (modo() === 'nuevo') { <span class="font-label-badge text-label-badge bg-secondary-container text-on-secondary px-2 py-0.5 rounded-full">Nuevo</span> }
+          @else if (f) { <span class="font-label-badge text-label-badge px-2 py-0.5 rounded-full" [class]="f.estado === 'ACTIVO' ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-error text-on-error'">{{ f.estado === 'ACTIVO' ? 'Activo' : 'Baja' }}</span> }
+        </div>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight">{{ modo() === 'nuevo' ? 'Registrar nuevo cliente' : 'Ficha de Cliente y Cuenta Corriente' }}</h1>
+      </div>
+    </div>
+    <div class="flex items-center gap-space-sm w-full md:w-auto no-print">
+      <button class="flex items-center justify-center gap-1.5 px-space-md py-2.5 rounded-lg bg-tertiary-fixed hover:bg-tertiary-fixed-dim text-on-tertiary-fixed font-headline-sm text-headline-sm transition-transform active:scale-95 shadow-sm" type="button" (click)="ayuda.set(true)">
+        <span class="material-symbols-outlined text-[20px]">help</span><span>¿Cómo funciona la ficha? ⓘ</span>
+      </button>
+      @if (f && modo() === 'ver') {
+        <button class="p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface" title="Imprimir hoja de confianza" type="button" (click)="imprimir()"><span class="material-symbols-outlined">print</span></button>
+      }
+    </div>
+  </div>
+
+  @if (modo() === 'ver' && f) {
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+      <!-- Columna izquierda: credencial -->
+      <div class="lg:col-span-4 flex flex-col gap-space-md">
+        <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col gap-space-md">
+          <div class="h-2 w-full chicha-gradient absolute top-0 left-0 right-0"></div>
+          <div class="flex items-start justify-between gap-space-sm pt-2">
+            <div class="flex items-center gap-2">
+              <span class="font-label-badge text-label-badge bg-on-surface text-surface-bright px-2 py-1 rounded">CREDENCIAL VECINAL</span>
+              <span class="font-label-badge text-label-badge bg-secondary-fixed text-on-secondary-fixed px-2 py-0.5 rounded">#VEC-{{ f.id.toString().padStart(4, '0') }}</span>
+            </div>
+            <div class="transform rotate-3 shadow-sm px-2.5 py-1 rounded-full flex items-center gap-1" [class]="f.resumen.enMora ? 'bg-error text-on-error' : 'bg-tertiary-fixed text-on-tertiary-fixed'">
+              <span class="material-symbols-outlined text-[14px]">{{ f.resumen.enMora ? 'timer' : 'star' }}</span>
+              <span class="font-label-badge text-label-badge tracking-wide uppercase">{{ f.resumen.enMora ? 'MORA ' + f.resumen.diasMora + ' DÍAS' : '¡AL DÍA!' }}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-space-md bg-surface-container-low p-space-sm rounded-lg">
+            <div class="w-20 h-20 rounded-xl shrink-0 shadow-sm bg-gradient-to-br from-primary-container via-secondary-container to-tertiary-fixed flex items-center justify-center font-currency-display text-currency-display text-on-primary">{{ f.nombres | iniciales }}</div>
+            <div class="flex flex-col min-w-0">
+              <span class="font-body-sm text-[11px] text-on-surface-variant font-bold uppercase tracking-wider">Titular de la libreta</span>
+              <h2 class="font-headline-md text-headline-md text-on-surface leading-tight">{{ f.nombres }}</h2>
+              <span class="font-body-sm text-body-sm text-primary font-bold">DNI: {{ f.dni }}</span>
+            </div>
+          </div>
+          <div class="bg-surface-container p-space-md rounded-xl flex items-center justify-between gap-space-sm">
+            <div class="flex flex-col">
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Uso de su línea de crédito</span>
+              <span class="font-label-badge text-label-badge font-black uppercase" [class]="nivelUso().clase">{{ f.resumen.enMora ? 'Con mora pendiente' : 'Libreta en orden' }}</span>
+              <span class="font-body-sm text-[12px] text-on-surface-variant">Acceso a «Mi libreta»: usuario {{ f.login }}</span>
+            </div>
+            <div class="relative flex items-center justify-center shrink-0 w-16 h-16 rounded-full shadow-sm"
+                 [style.background]="'conic-gradient(#e6007e ' + f.resumen.usoPorcentaje * 3.6 + 'deg, #ebe7e7 0deg)'">
+              <div class="w-12 h-12 rounded-full bg-surface-container-lowest flex flex-col items-center justify-center">
+                <span class="font-headline-sm text-[14px] text-on-surface leading-none">{{ f.resumen.usoPorcentaje }}</span>
+                <span class="font-label-badge text-[9px] text-on-surface-variant leading-none">%</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col gap-space-xs text-body-sm font-body-sm">
+            <div class="flex items-center gap-space-sm p-space-xs">
+              <span class="material-symbols-outlined text-primary">smartphone</span>
+              <div class="flex flex-col min-w-0"><span class="text-on-surface-variant text-[11px] uppercase font-bold">Celular WhatsApp</span><span class="text-on-surface font-semibold">{{ f.telefono.slice(0, 3) }}-{{ f.telefono.slice(3, 6) }}-{{ f.telefono.slice(6) }}</span></div>
+              <a class="ml-auto p-1.5 rounded-lg bg-surface-container hover:bg-primary-fixed text-primary transition-colors no-print" [href]="'https://wa.me/51' + f.telefono" target="_blank" rel="noopener" title="Chatear por WhatsApp"><span class="material-symbols-outlined text-[18px]">chat</span></a>
+            </div>
+            <div class="flex items-start gap-space-sm p-space-xs">
+              <span class="material-symbols-outlined text-secondary">home_pin</span>
+              <div class="flex flex-col min-w-0"><span class="text-on-surface-variant text-[11px] uppercase font-bold">Dirección del barrio</span><span class="text-on-surface font-medium leading-snug">{{ f.direccion }}</span></div>
+            </div>
+            <div class="flex items-center gap-space-sm p-space-xs">
+              <span class="material-symbols-outlined text-tertiary">calendar_month</span>
+              <div class="flex flex-col"><span class="text-on-surface-variant text-[11px] uppercase font-bold">Cliente desde</span><span class="text-on-surface font-medium">{{ f.fechaRegistro | fecha }} ({{ antiguedad() }})</span></div>
+            </div>
+            <div class="flex items-center gap-space-sm p-space-xs">
+              <span class="material-symbols-outlined text-primary">mail</span>
+              <div class="flex flex-col min-w-0"><span class="text-on-surface-variant text-[11px] uppercase font-bold">Correo (código y estados de cuenta)</span><span class="text-on-surface font-medium truncate">{{ f.email }}</span></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-space-xs pt-space-xs no-print">
+            <a routerLink="/bitacora" [queryParams]="{ usuario: f.dni }" class="flex items-center justify-center gap-1.5 py-3 px-space-sm rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md shadow-sm transition-colors">
+              <span class="material-symbols-outlined text-[18px]">policy</span><span>Auditoría</span>
+            </a>
+            <a [routerLink]="['/nueva-compra']" [queryParams]="{ cliente: f.id }" class="flex items-center justify-center gap-1.5 py-3 px-space-sm rounded-lg bg-secondary-fixed hover:bg-secondary-fixed-dim text-on-secondary-fixed font-label-md text-label-md shadow-sm transition-colors" [class.pointer-events-none]="f.estado !== 'ACTIVO'" [class.opacity-50]="f.estado !== 'ACTIVO'">
+              <span class="material-symbols-outlined text-[18px] text-secondary">add_shopping_cart</span><span>Nueva compra</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+          <div class="flex items-center justify-between">
+            <span class="font-headline-sm text-headline-sm text-on-surface uppercase">Saldo al Día de Hoy</span>
+            <span class="font-label-badge text-label-badge px-2 py-0.5 rounded-full font-bold" [class]="f.resumen.enMora ? 'bg-error text-on-error' : 'bg-tertiary-fixed text-on-tertiary-fixed'">{{ f.resumen.enMora ? 'EN MORA' : 'CORRIENTE' }}</span>
+          </div>
+          <div class="flex items-baseline gap-1 bg-surface-container-low p-space-sm rounded-lg">
+            <span class="font-currency-display text-currency-display text-primary">S/</span>
+            <span class="font-currency-display text-currency-display text-on-surface">{{ f.resumen.deudaVigente | soles }}</span>
+            <span class="font-body-sm text-[12px] text-on-surface-variant ml-auto">Deuda vigente (capital)</span>
+          </div>
+          <div class="flex items-center justify-between text-body-sm"><span class="text-on-surface-variant">Saldo al corte{{ f.resumen.idEstadoPendiente ? ' pendiente' : ' (próximo)' }}:</span><span class="text-on-surface font-bold">S/ {{ f.resumen.saldoAlCorte | soles }}</span></div>
+          @if (f.resumen.enMora) { <div class="flex items-center justify-between text-body-sm"><span class="text-on-surface-variant">Mora a hoy ({{ f.resumen.diasMora }} días):</span><span class="text-error font-bold">+ S/ {{ f.resumen.moraAplicada | soles }}</span></div> }
+          <div class="flex items-center justify-between text-body-sm"><span class="text-on-surface-variant">{{ f.resumen.idEstadoPendiente ? 'Fecha de pago pactada:' : 'Próximo corte mensual:' }}</span><span class="text-secondary font-bold">{{ (f.resumen.idEstadoPendiente ? f.resumen.fechaPago : f.resumen.fechaCorte) | fecha }}</span></div>
+          @if (f.resumen.idEstadoPendiente) {
+            <a [routerLink]="['/pagos']" [queryParams]="{ cliente: f.id }" class="mt-1 w-full py-2.5 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2 no-print"><span class="material-symbols-outlined text-[18px]">receipt_long</span>Cobrar S/ {{ f.resumen.totalACobrar | soles }}</a>
+          }
+        </div>
+      </div>
+
+      <!-- Columna derecha -->
+      <div class="lg:col-span-8 flex flex-col gap-space-lg">
+        <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm pb-space-sm">
+            <div class="flex items-center gap-space-sm">
+              <div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined">gavel</span></div>
+              <div class="flex flex-col">
+                <h3 class="font-headline-md text-headline-md text-on-surface uppercase tracking-tight">Condiciones y Política de Crédito</h3>
+                <span class="font-body-sm text-body-sm text-on-surface-variant">Parámetros formales de la línea de fiado vecinal</span>
+              </div>
+            </div>
+            <span class="font-label-badge text-label-badge bg-surface-container text-on-surface-variant px-3 py-1 rounded-full uppercase">Moneda: {{ f.moneda === 'PEN' ? 'Soles (PEN)' : 'Dólares (USD)' }}</span>
+          </div>
+          <div class="bg-surface-container-low p-space-md rounded-xl flex flex-col gap-space-sm">
+            <div class="flex flex-wrap items-end justify-between gap-space-xs">
+              <div class="flex flex-col"><span class="font-body-sm text-body-sm text-on-surface-variant font-medium">Línea de Crédito Aprobada</span><span class="font-currency-display text-currency-display text-on-surface">S/ {{ f.limiteCredito | soles }}</span></div>
+              <div class="flex items-center gap-space-md">
+                <div class="flex flex-col text-right"><span class="font-body-sm text-[12px] text-on-surface-variant font-bold uppercase">Crédito Utilizado</span><span class="font-headline-sm text-headline-sm text-primary">S/ {{ f.resumen.deudaVigente | soles }} ({{ f.resumen.usoPorcentaje }}%)</span></div>
+                <div class="flex flex-col text-right"><span class="font-body-sm text-[12px] text-on-surface-variant font-bold uppercase">Crédito Libre</span><span class="font-headline-sm text-headline-sm text-tertiary">S/ {{ f.resumen.creditoLibre | soles }}</span></div>
+              </div>
+            </div>
+            <div class="w-full bg-surface-container-highest h-4 rounded-full overflow-hidden p-0.5">
+              <div class="bg-gradient-to-r from-secondary-container via-primary-container to-primary h-full rounded-full transition-all duration-500" [style.width.%]="f.resumen.usoPorcentaje"></div>
+            </div>
+            <div class="flex items-center justify-between text-[12px] text-on-surface-variant">
+              <span>S/ 0.00</span><span class="font-medium" [class]="nivelUso().clase">{{ nivelUso().texto }}</span><span>S/ {{ f.limiteCredito | soles }}</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md pt-space-xs">
+            <div class="bg-surface-container rounded-xl p-space-md flex flex-col justify-between gap-space-xs">
+              <div class="flex items-center justify-between"><span class="font-label-badge text-label-badge text-on-surface-variant uppercase">Estructura</span><fp-info titulo="Tipo de tasa" texto="Efectiva: ya incluye la capitalización. Nominal: indica cada cuánto se capitaliza (ej.: TNA 36 % capitalizable diariamente)." /></div>
+              <div><span class="font-body-sm text-body-sm text-on-surface-variant block">Tipo de Tasa</span><span class="font-headline-sm text-headline-sm text-on-surface">{{ siglaTasa(f.tipoTasa, f.diasPlazoTasa) }} {{ f.tasaPorcentaje }} %</span><span class="block font-body-sm text-[11px] text-on-surface-variant">Tasa {{ f.tipoTasa === 'NOMINAL' ? 'nominal' : 'efectiva' }} {{ nombrePlazo(f.diasPlazoTasa).toLowerCase() }} pactada</span></div>
+            </div>
+            <div class="bg-surface-container rounded-xl p-space-md flex flex-col justify-between gap-space-xs">
+              <div class="flex items-center justify-between"><span class="font-label-badge text-label-badge text-primary uppercase">Compensatoria</span><fp-info titulo="TEA compensatoria" [texto]="'Interés por el uso del dinero desde la compra hasta la fecha de pago. Equivale a una TEM de ' + f.temPorcentaje.toFixed(4) + ' %.'" /></div>
+              <div><span class="font-body-sm text-body-sm text-on-surface-variant block">TEA Compensatoria</span><span class="font-currency-display text-[26px] leading-tight text-primary font-black">{{ f.teaPorcentaje.toFixed(4) }} %</span><span class="block font-body-sm text-[11px] text-on-surface-variant">Dentro del tope BCRP</span></div>
+            </div>
+            <div class="bg-surface-container rounded-xl p-space-md flex flex-col justify-between gap-space-xs">
+              <div class="flex items-center justify-between"><span class="font-label-badge text-label-badge text-error uppercase">Mora de Ley</span><fp-info titulo="Tasa moratoria" texto="Se cobra solo por los días de atraso, además del interés compensatorio. No puede superar el tope del BCRP." /></div>
+              <div><span class="font-body-sm text-body-sm text-on-surface-variant block">TEA Moratoria</span><span class="font-currency-display text-[26px] leading-tight text-error font-black">{{ f.teaMoraPorcentaje.toFixed(4) }} %</span><span class="block font-body-sm text-[11px] text-on-surface-variant">Aplica tras la fecha de pago</span></div>
+            </div>
+            <div class="bg-surface-container rounded-xl p-space-md flex flex-col justify-between gap-space-xs">
+              <div class="flex items-center justify-between"><span class="font-label-badge text-label-badge text-on-surface-variant uppercase">Periodo</span><fp-info titulo="Plazo máximo" texto="Número máximo de cuotas mensuales que puede pactar en una compra en cuotas." /></div>
+              <div><span class="font-body-sm text-body-sm text-on-surface-variant block">Plazo de Pago</span><span class="font-headline-sm text-headline-sm text-on-surface">Fin de mes / {{ f.maxMeses }} cuotas</span><span class="block font-body-sm text-[11px] text-on-surface-variant">Máximo de cuotas mensuales</span></div>
+            </div>
+            <div class="bg-surface-container rounded-xl p-space-md flex flex-col justify-between gap-space-xs">
+              <div class="flex items-center justify-between"><span class="font-label-badge text-label-badge text-on-surface-variant uppercase">Cálculo</span><fp-info titulo="Capitalización" texto="Período en que el interés se suma al capital. Si no se indica, se asume diaria. Año comercial de 360 días." /></div>
+              <div><span class="font-body-sm text-body-sm text-on-surface-variant block">Capitalización</span><span class="font-headline-sm text-headline-sm text-on-surface">{{ f.tipoTasa === 'NOMINAL' ? nombrePlazo(f.diasCapitalizacion) : 'Diaria' }} ({{ f.moneda === 'PEN' ? 'S/' : 'US$' }})</span><span class="block font-body-sm text-[11px] text-on-surface-variant">TED {{ f.tedPorcentaje.toFixed(7) }} %</span></div>
+            </div>
+            <div class="bg-surface-container rounded-xl p-space-md flex flex-col justify-between gap-space-xs">
+              <div class="flex items-center justify-between"><span class="font-label-badge text-label-badge text-secondary uppercase">Fechas Clave</span><fp-info titulo="Día de corte / día de pago" texto="Corte: día en que se cierran las compras del mes. Pago: día en que el cliente paga. Deben ser distintos." /></div>
+              <div><span class="font-body-sm text-body-sm text-on-surface-variant block">Corte / Límite</span><span class="font-headline-sm text-headline-sm text-secondary">Día {{ f.diaCorte }} ➜ Día {{ f.diaPago }}</span><span class="block font-body-sm text-[11px] text-on-surface-variant">{{ f.diaPago > f.diaCorte ? 'Paga el mismo mes del corte' : 'Paga el mes siguiente al corte' }}</span></div>
+            </div>
+          </div>
+          <div class="bg-surface-container-low rounded-xl p-space-md relative overflow-hidden flex flex-col gap-space-sm">
+            <div class="h-1.5 w-full chicha-gradient absolute top-0 left-0"></div>
+            <div class="flex items-start gap-space-sm pt-1">
+              <span class="material-symbols-outlined text-[26px] fill-1" [class]="f.consentimiento ? 'text-primary' : 'text-outline'">{{ f.consentimiento ? 'check_box' : 'check_box_outline_blank' }}</span>
+              <div class="flex flex-col gap-1 text-body-sm">
+                <span class="font-headline-sm text-headline-sm text-on-surface leading-snug">Consentimiento Legal y Autorización de Cuenta Corriente Vecinal</span>
+                <p class="text-on-surface-variant text-body-sm"><strong class="text-on-surface font-semibold">{{ f.nombres }}</strong> (DNI {{ f.dni }}) autoriza de forma expresa e informada el registro de su cuenta corriente en FiadoPe de <span class="font-semibold text-on-surface">{{ auth.perfil()?.tienda?.razonSocial }}</span> y acepta la Política de Privacidad según la <strong class="text-on-surface">Ley N° 29733 (Ley de Protección de Datos Personales del Perú)</strong>.</p>
+                @if (f.consentimiento; as c) {
+                  <div class="flex flex-wrap items-center gap-space-md text-[12px] text-on-surface-variant pt-1">
+                    <span class="flex items-center gap-1 font-semibold text-tertiary"><span class="material-symbols-outlined text-[16px]">verified_user</span> Política {{ c.version }} aceptada</span>
+                    <span>•</span><span>Registrado el: {{ c.fechaHora | fecha }} {{ c.fechaHora | hora }}</span>
+                    <span>•</span><span>IP: {{ c.ip }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Historial -->
+        <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm">
+            <div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-secondary">history</span><h3 class="font-headline-md text-headline-md text-on-surface uppercase">Historial de Compras</h3></div>
+            <span class="font-label-badge text-label-badge bg-surface-container px-2.5 py-1 rounded-full text-on-surface-variant">{{ f.compras.length }} compras</span>
+          </div>
+          <div class="flex flex-col gap-2">
+            @for (c of f.compras; track c.id) {
+              <div class="bg-surface-container-low hover:bg-surface-container p-space-sm rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm transition-colors">
+                <div class="flex items-center gap-space-sm">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" [class]="c.pagada ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-surface-container-highest text-on-surface'">
+                    <span class="material-symbols-outlined text-[20px]">{{ c.modalidad === 'CUOTAS' ? 'event_repeat' : 'shopping_basket' }}</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <div class="flex items-center gap-space-xs flex-wrap">
+                      <span class="font-headline-sm text-headline-sm text-on-surface">{{ c.producto }} × {{ c.cantidad }}</span>
+                      @if (c.pagada) { <span class="font-label-badge text-label-badge bg-[#00C853] text-[#111111] px-2 py-0.5 rounded-full transform -rotate-1 shadow-sm font-black">PAGADA</span> }
+                      @else if (c.modalidad === 'CUOTAS') { <span class="font-label-badge text-label-badge bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full font-bold">CUOTA {{ c.cuotasPagadas + 1 }} DE {{ c.nCuotas }}</span> }
+                      @else { <span class="font-label-badge text-label-badge bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded-full font-bold">FIN DE MES</span> }
+                    </div>
+                    <span class="font-body-sm text-[12px] text-on-surface-variant">{{ c.fechaHora | fecha }} • {{ c.fechaHora | hora }} • Paga el {{ c.fechaPagoAsignada | fecha }} ({{ c.dias }} días{{ c.modalidad === 'CUOTAS' ? ' de gracia' : '' }})</span>
+                  </div>
+                </div>
+                <div class="flex sm:flex-col items-end justify-between sm:justify-center">
+                  <span class="font-currency-md text-currency-md font-bold" [class]="c.pagada ? 'text-on-surface-variant' : 'text-primary'">S/ {{ (c.modalidad === 'CUOTAS' ? c.totalPlazo : c.montoS) | soles }}</span>
+                  @if (c.modalidad === 'CUOTAS') { <a [routerLink]="['/cronograma', c.id]" class="font-body-sm text-[11px] text-primary font-bold hover:underline">Ver cronograma ›</a> }
+                  @else { <span class="font-body-sm text-[11px] text-on-surface-variant">Capital S/ {{ c.capital | soles }} + interés {{ c.interes | soles }}</span> }
+                </div>
+              </div>
+            } @empty {
+              <p class="p-space-md text-center text-on-surface-variant font-body-sm text-body-sm">Aún no tiene compras fiadas.</p>
+            }
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md no-print">
+          <div class="flex items-center justify-between">
+            <span class="font-label-badge text-label-badge text-on-surface-variant uppercase tracking-wider font-bold">ACCIONES RÁPIDAS DEL NEGOCIO</span>
+            <button type="button" class="font-body-sm text-[12px] font-bold" [class]="f.estado === 'ACTIVO' ? 'text-error' : 'text-secondary'" (click)="f.estado === 'ACTIVO' ? confirmaBaja.set(true) : cambiarEstado()">{{ f.estado === 'ACTIVO' ? 'Dar de baja al cliente' : 'Reactivar cliente' }}</button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+            <button class="flex items-center justify-center gap-2 py-4 px-space-md rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-headline-sm text-headline-sm transition-transform active:scale-95 shadow-sm" type="button" (click)="editar()"><span class="material-symbols-outlined">edit_note</span><span>EDITAR CONDICIONES</span></button>
+            <button class="flex items-center justify-center gap-2 py-4 px-space-md rounded-xl bg-tertiary-fixed hover:bg-tertiary-fixed-dim text-on-tertiary-fixed font-headline-sm text-headline-sm transition-transform active:scale-95 shadow-sm" type="button" (click)="imprimir()"><span class="material-symbols-outlined">print</span><span>HOJA DE CONFIANZA</span></button>
+            <button class="flex items-center justify-center gap-2 py-4 px-space-md rounded-xl bg-primary-container hover:bg-primary text-on-primary-container font-headline-sm text-headline-sm transition-transform active:scale-95 shadow-md" type="button" (click)="whatsapp()"><span class="material-symbols-outlined">send</span><span>ENVIAR POR WHATSAPP</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Formulario: nuevo o editar -->
+  @if (modo() !== 'ver') {
+    <form class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg" (ngSubmit)="guardar()" novalidate>
+      @if (errorForm()) { <p class="lg:col-span-12 p-3 rounded-lg bg-error-container text-on-error-container font-body-sm text-body-sm font-semibold flex items-center gap-2" role="alert"><span class="material-symbols-outlined">error</span>{{ errorForm() }}</p> }
+      <div class="lg:col-span-4 flex flex-col gap-space-md">
+        <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col gap-space-md">
+          <div class="h-2 w-full chicha-gradient absolute top-0 left-0 right-0"></div>
+          <span class="font-label-badge text-label-badge bg-on-surface text-surface-bright px-2 py-1 rounded self-start mt-2">DATOS DEL VECINO</span>
+          <div class="flex flex-col gap-1">
+            <label class="etiqueta">DNI o CE <fp-info titulo="Documento" texto="DNI de 8 dígitos (o CE de 9 a 12). Será su usuario para ingresar a «Mi libreta». Único en tu tienda." /></label>
+            <input class="campo font-mono" [class.invalido]="errores()['dni']" name="dni" [(ngModel)]="form.dni" maxlength="12" inputmode="numeric" placeholder="47891230" [readonly]="modo() === 'editar'" />
+            @if (errores()['dni']) { <p class="error-campo">{{ errores()['dni'] }}</p> }
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="etiqueta">Nombres y apellidos</label>
+            <input class="campo" [class.invalido]="errores()['nombres']" name="nombres" [(ngModel)]="form.nombres" maxlength="100" placeholder="Rosa Quispe Mamani" />
+            @if (errores()['nombres']) { <p class="error-campo">{{ errores()['nombres'] }}</p> }
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="etiqueta">Dirección</label>
+            <input class="campo" [class.invalido]="errores()['direccion']" name="direccion" [(ngModel)]="form.direccion" maxlength="150" placeholder="Mz. B Lote 14" />
+            @if (errores()['direccion']) { <p class="error-campo">{{ errores()['direccion'] }}</p> }
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="etiqueta">Celular <fp-info titulo="Teléfono" texto="9 dígitos y empieza con 9. Ej.: 912345678." /></label>
+            <input class="campo font-mono" [class.invalido]="errores()['telefono']" name="telefono" [(ngModel)]="form.telefono" maxlength="9" inputmode="numeric" placeholder="912345678" />
+            @if (errores()['telefono']) { <p class="error-campo">{{ errores()['telefono'] }}</p> }
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="etiqueta">Correo <fp-info titulo="Correo" texto="Aquí recibe su código de acceso y sus estados de cuenta." /></label>
+            <input class="campo" [class.invalido]="errores()['email']" name="email" type="email" [(ngModel)]="form.email" maxlength="100" placeholder="vecino@correo.com" />
+            @if (errores()['email']) { <p class="error-campo">{{ errores()['email'] }}</p> }
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="etiqueta">{{ modo() === 'nuevo' ? 'Contraseña de «Mi libreta»' : 'Nueva contraseña (opcional)' }}</label>
+            <input class="campo" [class.invalido]="errores()['clave']" name="clave" type="password" [(ngModel)]="form.clave" autocomplete="new-password" placeholder="Mín. 8, mayúscula, número y símbolo" />
+            @if (errores()['clave']) { <p class="error-campo">{{ errores()['clave'] }}</p> }
+          </div>
+        </div>
+      </div>
+      <div class="lg:col-span-8 flex flex-col gap-space-lg">
+        <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+          <div class="flex items-center gap-space-sm">
+            <div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined">gavel</span></div>
+            <div class="flex flex-col">
+              <h3 class="font-headline-md text-headline-md text-on-surface uppercase tracking-tight">Condiciones y Política de Crédito</h3>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">{{ modo() === 'editar' ? 'Los cambios de tasa solo se aplican a compras futuras' : 'Lo que pactas con tu vecino' }}</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+            <div class="bg-surface-container rounded-xl p-space-md flex flex-col gap-2">
+              <span class="font-label-badge text-label-badge text-primary uppercase flex items-center justify-between">Tasa compensatoria <fp-info titulo="Tipo de tasa" texto="Efectiva: ya incluye la capitalización. Nominal: indica cada cuánto se capitaliza (ej.: TNA 36 % capitalizable diariamente)." /></span>
+              <div class="grid grid-cols-2 gap-2">
+                <select class="campo" name="tipoTasa" [(ngModel)]="form.tipoTasa" (ngModelChange)="cambio()"><option value="EFECTIVA">Efectiva</option><option value="NOMINAL">Nominal</option></select>
+                <select class="campo" name="plazo" [(ngModel)]="form.diasPlazoTasa" (ngModelChange)="cambio()">@for (p of plazos; track p.dias) { <option [ngValue]="p.dias">{{ p.texto }}</option> }</select>
+              </div>
+              <div class="relative"><input class="campo font-mono pr-8" [class.invalido]="errores()['tasaPorcentaje']" name="tasa" type="number" step="0.0001" min="0" [(ngModel)]="form.tasaPorcentaje" (ngModelChange)="cambio()" /><span class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant">%</span></div>
+              <span class="font-body-sm text-[12px] text-on-surface-variant">Equivale a <strong class="text-primary">TEA {{ teaPrev().toFixed(4) }} %</strong> · tope {{ topes() ? (topes()!.teaCompensatoria * 100).toFixed(2) : '—' }} %</span>
+              @if (errores()['tasaPorcentaje']) { <p class="error-campo">{{ errores()['tasaPorcentaje'] }}</p> }
+            </div>
+            <div class="bg-surface-container rounded-xl p-space-md flex flex-col gap-2">
+              <span class="font-label-badge text-label-badge text-error uppercase flex items-center justify-between">Tasa moratoria <fp-info titulo="Tasa moratoria" texto="Se cobra solo por los días de atraso, además del interés compensatorio. No puede superar el tope del BCRP." /></span>
+              <select class="campo" name="tipoTasaMora" [(ngModel)]="form.tipoTasaMora" (ngModelChange)="cambio()"><option value="EFECTIVA">Efectiva</option><option value="NOMINAL">Nominal</option></select>
+              <div class="relative"><input class="campo font-mono pr-8" [class.invalido]="errores()['tasaMoraPorcentaje']" name="tasaMora" type="number" step="0.0001" min="0" [(ngModel)]="form.tasaMoraPorcentaje" (ngModelChange)="cambio()" /><span class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant">%</span></div>
+              <span class="font-body-sm text-[12px] text-on-surface-variant">Mismo plazo que la compensatoria · <strong class="text-error">TEA {{ teaMorPrev().toFixed(4) }} %</strong> · tope {{ topes() ? (topes()!.teaMoratoria * 100).toFixed(2) : '—' }} %</span>
+              @if (errores()['tasaMoraPorcentaje']) { <p class="error-campo">{{ errores()['tasaMoraPorcentaje'] }}</p> }
+            </div>
+            @if (form.tipoTasa === 'NOMINAL' || form.tipoTasaMora === 'NOMINAL') {
+              <div class="bg-surface-container rounded-xl p-space-md flex flex-col gap-2">
+                <span class="font-label-badge text-label-badge text-on-surface-variant uppercase flex items-center justify-between">Capitalización <fp-info titulo="Capitalización" texto="Cada cuánto se suma el interés al capital en la tasa nominal." /></span>
+                <select class="campo" name="cap" [(ngModel)]="form.diasCapitalizacion" (ngModelChange)="cambio()">@for (p of plazos; track p.dias) { @if (p.dias <= form.diasPlazoTasa) { <option [ngValue]="p.dias">{{ p.texto }}</option> } }</select>
+                @if (errores()['diasCapitalizacion']) { <p class="error-campo">{{ errores()['diasCapitalizacion'] }}</p> }
+              </div>
+            }
+            <div class="bg-surface-container rounded-xl p-space-md flex flex-col gap-2">
+              <span class="font-label-badge text-label-badge text-on-surface-variant uppercase flex items-center justify-between">Límite de crédito y moneda <fp-info titulo="Límite de crédito" texto="Deuda máxima que el cliente puede tener; ninguna compra puede superarlo." /></span>
+              <div class="grid grid-cols-3 gap-2">
+                <select class="campo" name="moneda" [(ngModel)]="form.moneda"><option value="PEN">PEN</option><option value="USD">USD</option></select>
+                <input class="campo font-mono col-span-2" [class.invalido]="errores()['limiteCredito']" name="limite" type="number" step="0.01" min="1" [(ngModel)]="form.limiteCredito" />
+              </div>
+              @if (errores()['limiteCredito']) { <p class="error-campo">{{ errores()['limiteCredito'] }}</p> }
+            </div>
+            <div class="bg-surface-container rounded-xl p-space-md flex flex-col gap-2">
+              <span class="font-label-badge text-label-badge text-on-surface-variant uppercase flex items-center justify-between">Máximo de cuotas <fp-info titulo="Plazo máximo" texto="Número máximo de cuotas mensuales (2 a 24) para las compras en cuotas." /></span>
+              <input class="campo font-mono" [class.invalido]="errores()['maxMeses']" name="maxMeses" type="number" min="2" max="24" [(ngModel)]="form.maxMeses" />
+              @if (errores()['maxMeses']) { <p class="error-campo">{{ errores()['maxMeses'] }}</p> }
+            </div>
+            <div class="bg-surface-container rounded-xl p-space-md flex flex-col gap-2">
+              <span class="font-label-badge text-label-badge text-secondary uppercase flex items-center justify-between">Día de corte ➜ día de pago <fp-info titulo="Día de corte / día de pago" texto="Corte: día en que se cierran las compras del mes. Pago: día en que el cliente paga. Deben ser distintos (1 a 28)." /></span>
+              <div class="grid grid-cols-2 gap-2">
+                <input class="campo font-mono" [class.invalido]="errores()['diaCorte']" name="diaCorte" type="number" min="1" max="28" [(ngModel)]="form.diaCorte" />
+                <input class="campo font-mono" [class.invalido]="errores()['diaPago']" name="diaPago" type="number" min="1" max="28" [(ngModel)]="form.diaPago" />
+              </div>
+              @if (errores()['diaCorte']) { <p class="error-campo">{{ errores()['diaCorte'] }}</p> }
+              @if (errores()['diaPago']) { <p class="error-campo">{{ errores()['diaPago'] }}</p> }
+            </div>
+          </div>
+          @if (modo() === 'nuevo') {
+            <label class="bg-surface-container-low rounded-xl p-space-md relative overflow-hidden flex items-start gap-space-sm cursor-pointer" [class.ring-2]="errores()['aceptaPolitica']" [class.ring-error]="errores()['aceptaPolitica']">
+              <div class="h-1.5 w-full chicha-gradient absolute top-0 left-0"></div>
+              <input class="w-6 h-6 mt-1 rounded accent-primary cursor-pointer shrink-0" type="checkbox" name="acepta" [(ngModel)]="form.aceptaPolitica" />
+              <div class="flex flex-col gap-1 text-body-sm">
+                <span class="font-headline-sm text-headline-sm text-on-surface leading-snug">Consentimiento Legal y Autorización de Cuenta Corriente Vecinal</span>
+                <p class="text-on-surface-variant">El vecino autoriza de forma expresa e informada el registro de su cuenta corriente en FiadoPe de <strong class="text-on-surface">{{ auth.perfil()?.tienda?.razonSocial }}</strong> y acepta la Política de Privacidad (v1.0) según la <strong class="text-on-surface">Ley N° 29733</strong>. Sus datos solo se usan para gestionar su crédito y su estado de cuenta; puede acceder, rectificar o suprimirlos.</p>
+                @if (errores()['aceptaPolitica']) { <p class="error-campo">{{ errores()['aceptaPolitica'] }}</p> }
+              </div>
+            </label>
+          }
+          <div class="flex flex-col sm:flex-row justify-end gap-space-sm">
+            <button type="button" class="px-space-lg py-3 rounded-lg bg-surface-container text-on-surface font-headline-sm text-headline-sm" (click)="cancelar()">Cancelar</button>
+            <button type="submit" class="px-space-lg py-3 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm uppercase shadow-md hover:brightness-110 disabled:opacity-60 flex items-center justify-center gap-2" [disabled]="guardando()">
+              <span class="material-symbols-outlined">save</span>{{ guardando() ? 'Guardando…' : (modo() === 'nuevo' ? 'Registrar cliente' : 'Guardar condiciones') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  }
+</div>
+
+@if (confirmaBaja()) {
+  <div class="fixed inset-0 z-[60] bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-4" (click)="confirmaBaja.set(false)">
+    <div class="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-2xl overflow-hidden" (click)="$event.stopPropagation()">
+      <div class="h-2 w-full bg-error"></div>
+      <div class="p-space-lg flex flex-col gap-space-md">
+        <h3 class="font-headline-sm text-headline-sm text-on-surface">¿Dar de baja a {{ ficha()?.nombres }}?</h3>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Solo se puede dar de baja a un cliente sin deuda vigente. Ya no podrá ingresar a «Mi libreta» ni recibir fiados.</p>
+        <div class="flex justify-end gap-space-sm">
+          <button class="px-space-md py-2.5 rounded-lg bg-surface-container font-label-lg text-label-lg" type="button" (click)="confirmaBaja.set(false)">Cancelar</button>
+          <button class="px-space-lg py-2.5 rounded-lg bg-error text-on-error font-headline-sm text-headline-sm uppercase" type="button" (click)="cambiarEstado()">Dar de baja</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+@if (ayuda()) {
+  <fp-ayuda titulo="Guía de la Ficha Vecinal" subtitulo="Reglas de confianza para cobrar sin perder la amistad" [pasos]="ayudaClientes.pasos" boton="¡Entendido, gracias!" (cerrar)="ayuda.set(false)" />
+}

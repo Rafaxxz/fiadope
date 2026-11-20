@@ -1,0 +1,142 @@
+@let p = pagina();
+<div class="w-full max-w-[1360px] mx-auto px-gutter lg:px-gutter-desktop py-space-xl flex flex-col gap-space-lg">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+    <div class="flex flex-col gap-space-xs max-w-3xl">
+      <div class="flex flex-wrap items-center gap-space-sm">
+        <span class="bg-primary-container text-on-primary font-label-badge text-label-badge px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">SEGURIDAD ANTIFRAUDE</span>
+        <span class="bg-tertiary-fixed text-on-tertiary-fixed font-label-badge text-label-badge px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">lock</span>REGISTRO INALTERABLE</span>
+        <span class="text-on-surface-variant font-label-md text-label-md hidden sm:inline">{{ tienda() ?? auth.perfil()?.tienda?.razonSocial ?? 'Toda la plataforma' }}</span>
+      </div>
+      <h1 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight mt-1">BITÁCORA DE MOVIMIENTOS Y AUDITORÍA</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant">Registro de cada compra, pago, cambio de datos y acceso: quién lo hizo, cuándo y desde qué IP. La base de datos impide modificar o borrar cualquier anotación.</p>
+    </div>
+    <button class="w-full md:w-auto inline-flex items-center justify-center gap-space-xs bg-tertiary-fixed text-on-tertiary-fixed hover:bg-tertiary-fixed-dim font-headline-sm text-headline-sm px-space-lg py-3 rounded-lg shadow-sm transition-all transform active:scale-95" type="button" (click)="ayuda.set(true)">
+      <span class="material-symbols-outlined">policy</span><span>¿Cómo funciona la bitácora? ⓘ</span>
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-1">
+      <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-badge text-label-badge uppercase tracking-wider">EVENTOS REGISTRADOS</span><span class="material-symbols-outlined text-primary">fact_check</span></div>
+      <span class="font-currency-display text-currency-display text-on-surface">{{ p?.total ?? 0 }}</span>
+      <span class="font-body-sm text-body-sm text-on-surface-variant">Con los filtros actuales</span>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-1">
+      <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-badge text-label-badge uppercase tracking-wider">INTEGRIDAD DEL REGISTRO</span><span class="material-symbols-outlined text-secondary">verified_user</span></div>
+      <div class="flex items-center gap-2"><span class="font-headline-md text-headline-md text-secondary">INALTERABLE</span><span class="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span></div>
+      <span class="font-body-sm text-body-sm text-on-surface-variant">Sin UPDATE ni DELETE en la base</span>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-1">
+      <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-badge text-label-badge uppercase tracking-wider">ALERTAS EN ESTA PÁGINA</span><span class="material-symbols-outlined" [class]="alertas() ? 'text-error' : 'text-secondary'">gpp_maybe</span></div>
+      <span class="font-headline-md text-headline-md" [class]="alertas() ? 'text-error' : 'text-on-surface'">{{ alertas() }}</span>
+      <span class="font-body-sm text-body-sm text-on-surface-variant">Accesos fallidos, bloqueos o intentos indebidos</span>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-1">
+      <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-badge text-label-badge uppercase tracking-wider">ÚLTIMO RECAUDO TOTAL</span><span class="material-symbols-outlined text-primary">payments</span></div>
+      @if (ultimoPago(); as u) {
+        <span class="font-currency-display text-currency-display text-primary">S/ {{ valor(u.valorDespues, 'total pagado') }}</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant">{{ u.fechaHora | fecha }} · DNI {{ valor(u.valorDespues, 'cliente') }}</span>
+      } @else { <span class="font-headline-md text-headline-md text-on-surface-variant">—</span><span class="font-body-sm text-body-sm text-on-surface-variant">Sin pagos en esta página</span> }
+    </div>
+  </div>
+
+  <form class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md" (ngSubmit)="buscar()">
+    <div class="flex items-center justify-between">
+      <span class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-primary">tune</span>Filtros de búsqueda <fp-info titulo="Filtros de búsqueda" texto="Busca por usuario, tipo de acción, rango de fechas o dirección IP." /></span>
+      <button class="text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors" type="button" (click)="limpiar()">Limpiar filtros</button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-md items-end">
+      <div class="flex flex-col gap-1">
+        <label class="font-label-md text-label-md text-on-surface-variant" for="f-user">Usuario (DNI / RUC)</label>
+        <input id="f-user" class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md px-3 py-2.5 rounded-lg focus:outline-none focus:bg-surface-container-lowest focus:shadow-md" placeholder="Ej. 47891230" name="usuario" [(ngModel)]="usuario" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-md text-label-md text-on-surface-variant" for="f-accion">Acción realizada</label>
+        <select id="f-accion" class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md px-3 py-2.5 rounded-lg focus:outline-none" name="accion" [(ngModel)]="accion">
+          <option value="">Todas las acciones</option>
+          @for (a of acciones(); track a) { <option [value]="a">{{ nombre(a) }}</option> }
+        </select>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-md text-label-md text-on-surface-variant" for="f-desde">Desde</label>
+        <input id="f-desde" type="date" class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md px-3 py-2.5 rounded-lg focus:outline-none" name="desde" [(ngModel)]="desde" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-md text-label-md text-on-surface-variant" for="f-hasta">Hasta</label>
+        <input id="f-hasta" type="date" class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md px-3 py-2.5 rounded-lg focus:outline-none" name="hasta" [(ngModel)]="hasta" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-md text-label-md text-on-surface-variant" for="f-ip">Dirección IP</label>
+        <div class="flex gap-2">
+          <input id="f-ip" class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md px-3 py-2.5 rounded-lg focus:outline-none" placeholder="Ej. 190.236" name="ip" [(ngModel)]="ip" />
+          <button type="submit" class="px-3 rounded-lg bg-primary-container text-on-primary" title="Buscar"><span class="material-symbols-outlined">search</span></button>
+        </div>
+      </div>
+    </div>
+    @if (errorFiltro()) { <p class="error-campo">{{ errorFiltro() }}</p> }
+  </form>
+
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+    <div class="p-space-md sm:p-space-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm bg-surface-container-low">
+      <div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm text-on-surface">Movimientos registrados</span><span class="bg-surface-container-highest text-on-surface-variant font-label-badge text-label-badge px-2 py-0.5 rounded-full">{{ p?.contenido?.length ?? 0 }} mostrados</span></div>
+      <div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[18px]">lock</span>Solo lectura: no se pueden modificar ni borrar.</div>
+    </div>
+    <div class="w-full overflow-x-auto scroll-fino">
+      <table class="w-full text-left border-collapse min-w-[1000px]">
+        <thead>
+          <tr class="bg-surface-container text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+            <th class="py-3 px-4">Fecha y hora</th><th class="py-3 px-4">Usuario</th><th class="py-3 px-4">Acción realizada</th>
+            <th class="py-3 px-4">Valor anterior</th><th class="py-3 px-4">Valor nuevo</th><th class="py-3 px-4">Dirección IP</th><th class="py-3 px-4 text-center">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="font-body-sm text-body-sm text-on-surface">
+          @if (cargando()) { <tr><td colspan="7" class="py-10 text-center text-on-surface-variant">Consultando la bitácora…</td></tr> }
+          @for (r of p?.contenido ?? []; track r.id; let impar = $odd) {
+            @let antes = campos(r.valorAntes);
+            @let despues = campos(r.valorDespues);
+            <tr class="hover:bg-surface-container-low transition-colors align-top" [class]="impar ? 'bg-surface-container-low/40' : ''">
+              <td class="py-4 px-4 font-label-md text-label-md text-on-surface whitespace-nowrap"><div class="flex flex-col"><span>{{ r.fechaHora | fecha }}</span><span class="text-on-surface-variant font-body-sm text-[12px]">{{ r.fechaHora.substring(11, 19) }}</span></div></td>
+              <td class="py-4 px-4 whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-[11px]">{{ (r.usuario ?? '?').substring(0, 2) }}</div>
+                  <span class="font-label-md text-label-md text-on-surface font-mono">{{ r.usuario ?? 'desconocido' }}</span>
+                </div>
+              </td>
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full shrink-0" [class]="color(r.accion)"></span><span class="font-label-lg text-label-lg text-on-surface">{{ nombre(r.accion) }}</span></div>
+                <span class="text-on-surface-variant text-[12px] block">{{ r.tabla }}{{ r.idRegistro ? ' #' + r.idRegistro : '' }}</span>
+              </td>
+              <td class="py-4 px-4 max-w-[220px]">
+                @for (c of (abierto() === r.id ? antes : antes.slice(0, 3)); track c.k) { <span class="block text-[12px]"><span class="text-on-surface-variant">{{ c.k }}:</span> <span class="bg-error-container/60 text-on-error-container px-1 rounded">{{ c.v }}</span></span> }
+                @if (!antes.length) { <span class="text-on-surface-variant">—</span> }
+              </td>
+              <td class="py-4 px-4 max-w-[260px]">
+                @for (c of (abierto() === r.id ? despues : despues.slice(0, 3)); track c.k) { <span class="block text-[12px]"><span class="text-on-surface-variant">{{ c.k }}:</span> <span class="bg-surface-container px-1 rounded font-semibold">{{ c.v }}</span></span> }
+                @if (!despues.length) { <span class="text-on-surface-variant">—</span> }
+                @if (antes.length > 3 || despues.length > 3) { <button type="button" class="text-primary text-[12px] font-bold" (click)="abierto.set(abierto() === r.id ? null : r.id)">{{ abierto() === r.id ? 'Ver menos' : 'Ver todo' }}</button> }
+              </td>
+              <td class="py-4 px-4 whitespace-nowrap"><span class="font-mono text-on-surface font-semibold text-[13px]">{{ r.ip }}</span></td>
+              <td class="py-4 px-4 text-center whitespace-nowrap">
+                @if (alerta(r.accion)) { <span class="inline-block bg-error text-on-error font-label-badge text-label-badge px-3 py-1 rounded-full uppercase shadow-sm transform rotate-1">ALERTA</span> }
+                @else { <span class="inline-block bg-tertiary-fixed text-on-tertiary-fixed font-label-badge text-label-badge px-3 py-1 rounded-full uppercase shadow-sm transform -rotate-1">CONFORME</span> }
+              </td>
+            </tr>
+          } @empty {
+            @if (!cargando()) { <tr><td colspan="7" class="py-10 text-center text-on-surface-variant">No hay registros con esos filtros.</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="bg-surface-container-low px-space-md py-3 flex flex-col sm:flex-row items-center justify-between gap-space-sm font-label-md text-label-md text-on-surface-variant">
+      <span>Página {{ numero() + 1 }} de {{ p?.totalPaginas || 1 }} · {{ p?.total ?? 0 }} registros</span>
+      <div class="flex items-center gap-1">
+        <button type="button" class="p-1 rounded bg-surface-container hover:bg-surface-container-lowest text-on-surface disabled:opacity-40" [disabled]="numero() === 0" (click)="buscar(numero() - 1)"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+        <span class="px-3 py-1 rounded bg-primary-container text-on-primary font-bold">{{ numero() + 1 }}</span>
+        <button type="button" class="p-1 rounded bg-surface-container hover:bg-surface-container-lowest text-on-surface disabled:opacity-40" [disabled]="numero() + 1 >= (p?.totalPaginas ?? 1)" (click)="buscar(numero() + 1)"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+@if (ayuda()) {
+  <fp-ayuda [titulo]="ayudaBitacora.titulo" [pasos]="ayudaBitacora.pasos" boton="¡Entendido!" (cerrar)="ayuda.set(false)" />
+}

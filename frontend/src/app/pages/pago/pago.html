@@ -1,0 +1,213 @@
+@let p = preview();
+<div class="max-w-[1240px] w-full mx-auto px-gutter py-space-lg flex flex-col gap-space-lg">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center gap-space-sm flex-wrap">
+        <span class="font-label-badge text-label-badge uppercase px-space-sm py-0.5 rounded-full bg-primary-container text-on-primary font-bold">Módulo Mostrador P-10</span>
+        <span class="font-label-badge text-label-badge uppercase px-space-sm py-0.5 rounded-full bg-secondary-container text-on-secondary font-bold">Caja Activa</span>
+      </div>
+      <h1 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight">REGISTRAR PAGO DE VECINO</h1>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">Liquidación del estado de cuenta en tiempo real. Cuentas claras para mantener la confianza del barrio.</p>
+    </div>
+    <button class="inline-flex items-center gap-space-xs bg-tertiary-fixed text-on-tertiary-fixed px-space-md py-3 rounded-lg font-headline-sm text-headline-sm hover:brightness-105 active:scale-95 transition-all shadow-sm" type="button" (click)="ayuda.set(true)">
+      <span class="material-symbols-outlined">help</span><span>¿Cómo funciona la liquidación?</span>
+    </button>
+  </div>
+
+  <!-- Selección -->
+  <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-12 gap-space-md items-end">
+    <div class="md:col-span-7 flex flex-col gap-1">
+      <label class="etiqueta">Paso 1 · Vecino con estado de cuenta pendiente</label>
+      <select class="campo" [ngModel]="idCliente()" (ngModelChange)="elegir($event)">
+        <option [ngValue]="null">Elige al vecino…</option>
+        @for (c of pendientes(); track c.id) { <option [ngValue]="c.id">{{ c.nombres }} · DNI {{ c.dni }} · S/ {{ c.totalACobrar | soles }}{{ c.enMora ? ' · mora ' + c.diasMora + ' días' : '' }}</option> }
+      </select>
+      @if (!pendientes().length) { <p class="font-body-sm text-[12px] text-on-surface-variant">Nadie tiene estados de cuenta pendientes. Se generan en <a routerLink="/corte" class="text-primary font-bold">Corte mensual</a>.</p> }
+    </div>
+    <div class="md:col-span-5 flex flex-col gap-1">
+      <label class="etiqueta">Fecha en que paga <fp-info titulo="Fecha de pago real" texto="Día en que el cliente paga. Si es posterior a su fecha de pago pactada se calculan los días de mora. No puede ser futura." /></label>
+      <input class="campo" type="date" [max]="hoy" [ngModel]="fecha()" (ngModelChange)="fecha.set($event); cargar()" />
+    </div>
+  </div>
+
+  @if (error()) { <div class="p-space-md rounded-xl bg-error-container text-on-error-container font-label-lg text-label-lg flex items-center gap-2"><span class="material-symbols-outlined">error</span>{{ error() }}</div> }
+
+  @if (p) {
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+      <div class="lg:col-span-7 flex flex-col gap-space-md">
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+          <div class="flex items-center gap-space-md">
+            <div class="w-14 h-14 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-headline-md text-headline-md shrink-0">{{ p.cliente | iniciales }}</div>
+            <div class="flex flex-col">
+              <span class="font-label-badge text-label-badge text-on-surface-variant uppercase tracking-wider">Titular de libreta</span>
+              <h2 class="font-headline-md text-headline-md text-on-surface">{{ p.cliente }}</h2>
+              <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                <span class="font-body-sm text-body-sm text-on-surface-variant font-medium">DNI: {{ p.dni }}</span>
+                @if (p.estadosPendientes > 1) { <span class="text-on-surface-variant/40">•</span><span class="font-body-sm text-body-sm text-error font-bold">{{ p.estadosPendientes }} estados pendientes (se cobra el más antiguo)</span> }
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col items-start sm:items-end bg-surface-container-low p-space-sm rounded-lg">
+            <span class="font-label-md text-label-md text-on-surface-variant">Fecha de pago</span>
+            <div class="flex items-center gap-1.5 mt-0.5"><span class="material-symbols-outlined text-secondary text-[20px]">calendar_today</span><span class="font-headline-sm text-headline-sm text-secondary font-bold">{{ p.fechaPagoReal | fecha }}</span></div>
+          </div>
+        </div>
+
+        @if (p.diasMora > 0) {
+          <div class="bg-secondary-container text-on-secondary p-space-md rounded-xl shadow-md flex items-start gap-space-md relative overflow-hidden" role="alert">
+            <div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed shrink-0"><span class="material-symbols-outlined">timer</span></div>
+            <div class="flex flex-col gap-0.5">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-headline-sm text-headline-sm uppercase tracking-wide">⚠ PAGO FUERA DE FECHA</span>
+                <span class="font-label-badge text-label-badge bg-on-secondary text-secondary-container px-2 py-0.5 rounded-full font-bold uppercase">{{ p.diasMora }} {{ p.diasMora === 1 ? 'día' : 'días' }} de mora</span>
+              </div>
+              <p class="font-body-sm text-body-sm text-on-secondary/95">La fecha de pago pactada fue el <strong class="font-bold underline">{{ p.fechaPago | fecha }}</strong>. Se cobra el interés compensatorio y el moratorio por cada día de atraso.</p>
+            </div>
+          </div>
+        } @else {
+          <div class="bg-[#00C853]/15 text-on-surface p-space-md rounded-xl flex items-center gap-space-md">
+            <span class="material-symbols-outlined text-[#00873a]">check_circle</span>
+            <p class="font-body-sm text-body-sm"><strong>Pago a tiempo.</strong> La fecha de pago es el {{ p.fechaPago | fecha }}: no hay intereses por mora.</p>
+          </div>
+        }
+
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+          <div class="flex items-center justify-between pb-space-sm border-b border-surface-container">
+            <div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary">receipt</span><h3 class="font-headline-sm text-headline-sm text-on-surface uppercase">Desglose de la Libreta</h3></div>
+            <span class="font-label-badge text-label-badge bg-surface-container text-on-surface-variant px-2 py-1 rounded">Corte {{ p.fechaCorte | fecha }}</span>
+          </div>
+          <div class="flex flex-col gap-2">
+            @for (it of p.items; track $index) {
+              <div class="flex items-center justify-between py-1.5 px-space-sm rounded-lg font-body-sm text-body-sm">
+                <span class="text-on-surface-variant"><strong class="text-on-surface">{{ it.fecha | fecha: true }}</strong> · {{ it.detalle }}</span>
+                <span class="text-on-surface">S/ {{ it.total | soles }}</span>
+              </div>
+            }
+            <div class="flex items-center justify-between py-2 px-space-sm bg-surface-container-low rounded-lg">
+              <div class="flex flex-col"><span class="font-body-md text-body-md text-on-surface font-semibold">Saldo base al corte</span><span class="font-body-sm text-body-sm text-on-surface-variant">Cierre al {{ p.fechaCorte | fecha }}</span></div>
+              <span class="font-currency-md text-currency-md text-on-surface">S/ {{ p.saldoAlCorte | soles }}</span>
+            </div>
+            <div class="flex items-center justify-between py-2 px-space-sm bg-surface-container-lowest hover:bg-surface-container-low/50 rounded-lg transition-colors">
+              <div class="flex items-center gap-1.5 flex-wrap"><span class="font-body-md text-body-md text-on-surface">Interés compensatorio por mora</span><span class="font-label-md text-label-md text-on-surface-variant">({{ p.diasMora }} días al {{ p.teaPorcentaje.toFixed(4) }} % TEA)</span></div>
+              <span class="font-currency-md text-currency-md text-on-surface font-semibold">S/ {{ p.interesCompensatorioMora | soles }}</span>
+            </div>
+            <div class="flex items-center justify-between py-2 px-space-sm bg-surface-container-lowest hover:bg-surface-container-low/50 rounded-lg transition-colors">
+              <div class="flex items-center gap-1.5 flex-wrap"><span class="font-body-md text-body-md text-on-surface">Interés moratorio</span><span class="font-label-md text-label-md text-on-surface-variant">({{ p.diasMora }} días al {{ p.teaMoraPorcentaje.toFixed(4) }} % TEA moratoria)</span></div>
+              <span class="font-currency-md text-currency-md text-on-surface font-semibold">S/ {{ p.interesMoratorio | soles }}</span>
+            </div>
+            @if (p.diasMora > 0) {
+              <div class="flex items-center justify-between p-space-sm bg-tertiary-fixed/30 rounded-lg">
+                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-on-tertiary-fixed">sell</span><span class="font-headline-sm text-headline-sm text-on-tertiary-fixed font-bold">Intereses por mora</span><fp-info titulo="Intereses por mora" texto="Interés compensatorio y moratorio por cada día de atraso desde la fecha de pago pactada. Se muestran en un ítem aparte." /></div>
+                <span class="font-headline-sm text-headline-sm text-on-tertiary-fixed font-bold">S/ {{ p.totalMora | soles }}</span>
+              </div>
+            }
+          </div>
+          <div class="mt-space-sm p-space-lg bg-surface-container-highest rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+            <div>
+              <span class="font-label-badge text-label-badge uppercase tracking-wider text-primary font-black flex items-center">TOTAL EXACTO A COBRAR EN MOSTRADOR <fp-info titulo="Total exacto a cobrar" texto="Solo se acepta el pago del total; no se aceptan pagos parciales." /></span>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Suma no fraccionable · {{ p.moneda }}</p>
+            </div>
+            <span class="font-display-lg text-display-lg-mobile sm:text-display-lg font-black tracking-tight text-primary">S/ {{ p.total | soles }}</span>
+          </div>
+        </div>
+
+        <div class="bg-error-container text-on-error-container p-space-md rounded-xl flex items-start gap-space-sm shadow-sm">
+          <span class="material-symbols-outlined">gpp_maybe</span>
+          <div class="flex flex-col gap-1">
+            <span class="font-headline-sm text-headline-sm font-bold uppercase">🚨 AVISO IMPORTANTE: REGLA DE CORTE</span>
+            <p class="font-body-sm text-body-sm leading-relaxed">Para cancelar el corte y mantener el cuaderno en orden, <strong>SOLO SE ACEPTA EL PAGO TOTAL EXACTO (S/ {{ p.total | soles }})</strong>. No se admiten pagos parciales.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 flex flex-col gap-space-md">
+        @if (pago(); as r) {
+          <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col gap-space-md relative overflow-hidden">
+            <div class="h-2 w-full chicha-gradient absolute top-0 left-0"></div>
+            <div class="flex flex-col items-center text-center gap-2 pt-2">
+              <div class="w-16 h-16 rounded-full bg-[#00C853] text-[#111111] flex items-center justify-center shadow-md"><span class="material-symbols-outlined text-[36px]">task_alt</span></div>
+              <h3 class="font-headline-md text-headline-md text-on-surface uppercase">¡Cobro registrado!</h3>
+              <span class="font-label-badge text-label-badge bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-full font-bold uppercase">LIBRETA DEL PERÍODO EN S/ 0.00</span>
+            </div>
+            <div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-2 font-body-sm text-body-sm">
+              <div class="flex justify-between"><span class="text-on-surface-variant">Recibo N°</span><strong>{{ r.id.toString().padStart(6, '0') }}</strong></div>
+              <div class="flex justify-between"><span class="text-on-surface-variant">Método</span><strong>{{ r.metodoPago }}{{ r.nroOperacion ? ' · op. ' + r.nroOperacion : '' }}</strong></div>
+              <div class="flex justify-between"><span class="text-on-surface-variant">Fecha de pago</span><strong>{{ r.fechaReal | fecha }}</strong></div>
+              <div class="flex justify-between"><span class="text-on-surface-variant">Días de mora</span><strong>{{ r.diasMora }}</strong></div>
+              <div class="flex justify-between"><span class="text-on-surface-variant">Intereses por mora</span><strong>S/ {{ r.intCompMora + r.intMora | soles }}</strong></div>
+              <div class="flex justify-between pt-1 border-t border-surface-container"><span class="font-label-lg text-label-lg">Total pagado</span><strong class="text-primary font-headline-sm text-headline-sm">S/ {{ r.totalPagado | soles }}</strong></div>
+            </div>
+            <button class="w-full py-3 rounded-xl bg-primary-container text-on-primary-container font-headline-sm text-headline-sm flex items-center justify-center gap-2" type="button" (click)="constancia()"><span class="material-symbols-outlined">chat</span>Enviar constancia por WhatsApp</button>
+            <div class="grid grid-cols-2 gap-2">
+              <a [routerLink]="['/clientes', p.idCliente]" class="py-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-lg text-label-lg text-center">Ver ficha</a>
+              <button class="py-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-lg text-label-lg" type="button" (click)="otro()">Siguiente estado</button>
+            </div>
+          </div>
+        } @else {
+          <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-lg">
+            <div>
+              <span class="font-label-badge text-label-badge uppercase tracking-wider text-on-surface-variant font-bold">Paso 2</span>
+              <h3 class="font-headline-md text-headline-md text-on-surface uppercase">MÉTODO DE PAGO</h3>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Selecciona cómo cancela {{ p.cliente.split(' ')[0] }}:</p>
+            </div>
+            <div class="flex flex-col gap-2.5" role="radiogroup">
+              @for (m of metodos; track m.valor) {
+                <label class="cursor-pointer relative flex items-center justify-between p-space-md rounded-xl transition-colors" [class]="metodo() === m.valor ? 'bg-primary-fixed/40 ring-2 ring-primary-container' : 'bg-surface-container-low hover:bg-surface-container'">
+                  <input class="sr-only" name="metodo" type="radio" [value]="m.valor" [checked]="metodo() === m.valor" (change)="metodo.set(m.valor)" />
+                  <div class="flex items-center gap-space-sm">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-headline-sm shrink-0" [class]="metodo() === m.valor ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-highest text-on-surface'">{{ m.emoji }}</div>
+                    <div class="flex flex-col">
+                      <div class="flex items-center gap-2"><span class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ m.titulo }}</span>@if (m.valor === 'Yape/Plin') { <span class="font-label-badge text-label-badge bg-primary text-on-primary px-1.5 py-0.5 rounded-full uppercase font-bold">Recomendado</span> }</div>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant">{{ m.detalle }}</span>
+                    </div>
+                  </div>
+                  <span class="material-symbols-outlined" [class]="metodo() === m.valor ? 'text-primary fill-1' : 'text-outline'">{{ metodo() === m.valor ? 'radio_button_checked' : 'radio_button_unchecked' }}</span>
+                </label>
+              }
+            </div>
+            @if (metodo() !== 'Efectivo') {
+              <div class="flex flex-col gap-1.5 pt-2">
+                <div class="flex items-center justify-between"><label class="font-label-lg text-label-lg text-on-surface font-bold" for="op">Nro. de operación / referencia</label><span class="font-label-badge text-label-badge text-on-surface-variant">Obligatorio</span></div>
+                <div class="relative flex items-center">
+                  <span class="absolute left-3 material-symbols-outlined text-on-surface-variant text-[20px]">pin</span>
+                  <input id="op" class="w-full pl-10 pr-4 py-3 bg-surface rounded-lg font-headline-sm text-headline-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary shadow-inner" [class.ring-2]="errores()['nroOperacion']" [class.ring-error]="errores()['nroOperacion']"
+                         placeholder="Ej: 849201" maxlength="20" [ngModel]="nroOperacion()" (ngModelChange)="nroOperacion.set($event)" />
+                </div>
+                @if (errores()['nroOperacion']) { <p class="error-campo">{{ errores()['nroOperacion'] }}</p> }
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Comprueba los dígitos de la operación en la app del vecino.</p>
+              </div>
+            }
+            <div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-2">
+              <div class="flex items-center justify-between gap-2">
+                <label class="font-label-md text-label-md text-on-surface-variant" for="monto">Monto que entrega:</label>
+                <div class="relative w-40"><span class="absolute left-3 top-1/2 -translate-y-1/2 font-label-lg">S/</span>
+                  <input id="monto" class="w-full pl-8 pr-2 py-2 rounded-lg bg-surface-container-lowest font-headline-sm text-headline-sm text-right focus:outline-none focus:ring-2 focus:ring-primary" type="number" step="0.01" [ngModel]="monto()" (ngModelChange)="monto.set($event)" />
+                </div>
+              </div>
+              <div class="flex items-center justify-between"><span class="font-label-md text-label-md text-on-surface-variant">Diferencia con el total:</span><span class="font-headline-sm text-headline-sm font-bold" [class]="diferencia() === 0 ? 'text-on-surface' : 'text-error'">S/ {{ diferencia() | soles }}</span></div>
+              @if (errores()['montoPagado']) { <p class="error-campo">{{ errores()['montoPagado'] }}</p> }
+              <div class="flex items-center justify-between pt-1 border-t border-surface-container">
+                <span class="font-label-badge text-label-badge uppercase text-tertiary font-bold">Estado tras cobrar:</span>
+                <span class="font-label-badge text-label-badge bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded-full font-bold uppercase">LIBRETA AL DÍA (S/ 0.00)</span>
+              </div>
+            </div>
+            <div class="flex flex-col gap-space-sm pt-2">
+              <button class="w-full min-h-[58px] py-3.5 px-space-md rounded-xl bg-[#00C853] text-[#111111] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 font-headline-md text-headline-md tracking-tight shadow-md text-center disabled:opacity-60"
+                      type="button" [disabled]="guardando()" (click)="confirmar()">
+                <span class="material-symbols-outlined">payments</span><span>{{ guardando() ? 'Registrando…' : 'CONFIRMAR COBRO TOTAL DE S/ ' + (p.total | soles) }}</span>
+              </button>
+              <a routerLink="/panel" class="w-full py-3 px-space-md rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-colors text-center">Cancelar operación y volver al panel</a>
+            </div>
+          </div>
+        }
+        <div class="bg-surface-container-low p-space-md rounded-xl flex flex-col sm:flex-row items-center justify-between gap-space-md">
+          <div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-primary">verified</span><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface">Constancia transparente</span><span class="font-body-sm text-body-sm text-on-surface-variant">El pago queda en la bitácora y el vecino lo ve en «Mi libreta».</span></div></div>
+          <span class="font-label-badge text-label-badge bg-primary-fixed text-on-primary-fixed px-3 py-1 rounded-full uppercase font-bold shrink-0">Cero errores de cuaderno</span>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+@if (ayuda()) {
+  <fp-ayuda titulo="Guía de liquidación en mostrador" [pasos]="ayudaPago.pasos" boton="¡Entendido!" (cerrar)="ayuda.set(false)" />
+}

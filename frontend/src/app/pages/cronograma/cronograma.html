@@ -1,0 +1,166 @@
+@let c = crono();
+<div class="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-lowest p-5 sm:p-6 rounded-xl shadow-sm">
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center gap-2">
+        <span class="font-label-badge text-label-badge bg-primary/10 text-primary px-2.5 py-1 rounded-full uppercase tracking-wider">Módulo Financiero P08</span>
+        <span class="inline-flex items-center gap-1 font-label-badge text-label-badge bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded-md -rotate-1 shadow-sm"><span class="material-symbols-outlined text-[14px]">verified</span>MÉTODO FRANCÉS VENCIDO</span>
+      </div>
+      <h1 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight flex items-center gap-2 mt-1">Cronograma de Cuotas y Amortización</h1>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">Control transparente de la deuda en cuotas para la confianza de tu clientela y el orden del negocio.</p>
+    </div>
+    <div class="flex items-center gap-3 shrink-0 no-print">
+      <button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-lg text-label-lg shadow-sm transition-all active:scale-95" type="button" (click)="ayuda.set(true)">
+        <span>¿Cómo funciona el cálculo?</span><span class="bg-primary text-on-primary rounded-full w-5 h-5 flex items-center justify-center text-[11px] font-bold">ⓘ</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Selector de compra -->
+  <div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col md:flex-row gap-3 md:items-center no-print">
+    <span class="font-label-lg text-label-lg text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-primary">manage_search</span>Ver cronograma de:</span>
+    <select class="campo md:w-72" [ngModel]="idCliente()" (ngModelChange)="idCliente.set($event); compras.set([])">
+      <option [ngValue]="null" disabled>Elige un cliente…</option>
+      @for (x of clientes(); track x.id) { <option [ngValue]="x.id">{{ x.nombres }} · DNI {{ x.dni }}</option> }
+    </select>
+    <div class="flex flex-wrap gap-2">
+      @for (x of enCuotas(); track x.id) {
+        <a [routerLink]="['/cronograma', x.id]" class="px-3 py-2 rounded-lg font-label-md text-label-md"
+           [class]="c?.compra?.id === x.id ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container hover:bg-surface-container-high text-on-surface'">
+          {{ x.producto }} · {{ x.fechaHora | fecha }}{{ x.pagada ? ' ✓' : '' }}
+        </a>
+      } @empty {
+        @if (idCliente()) { <span class="font-body-sm text-body-sm text-on-surface-variant">Este cliente no tiene compras en cuotas.</span> }
+      }
+    </div>
+  </div>
+
+  @if (c) {
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div class="lg:col-span-8 bg-surface-container-lowest p-6 rounded-xl shadow-sm flex flex-col justify-between gap-6">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <div class="w-14 h-14 rounded-xl bg-primary-fixed flex items-center justify-center text-on-primary-fixed-variant shadow-inner"><span class="material-symbols-outlined text-[30px]">person</span></div>
+            <div class="flex flex-col">
+              <span class="font-label-badge text-label-badge text-on-surface-variant uppercase">Cliente vecino acreditado</span>
+              <h2 class="font-headline-md text-headline-md text-on-surface leading-tight">{{ c.cliente }}</h2>
+              <div class="flex items-center gap-2 mt-0.5 text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px]">badge</span><span>DNI {{ c.dni }} • Compra del {{ c.compra.fechaHora | fecha }}</span></div>
+            </div>
+          </div>
+          <div class="flex flex-col items-start sm:items-end">
+            <span class="font-label-badge text-label-badge text-on-surface-variant">PLAN CONTRATADO</span>
+            <span class="inline-flex items-center gap-1 font-headline-sm text-headline-sm text-primary-container bg-primary-fixed/40 px-3 py-1 rounded-lg mt-0.5"><span class="material-symbols-outlined text-[18px]">event_repeat</span>{{ c.filas.length }} Cuotas Mensuales</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 bg-surface-container-low p-4 rounded-xl">
+          <div class="flex flex-col"><span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">inventory_2</span>Bien entregado</span><span class="font-label-lg text-label-lg text-on-surface mt-1 font-bold">{{ c.compra.producto }}</span></div>
+          <div class="flex flex-col"><span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">sell</span>Precio de lista (C)</span><span class="font-currency-md text-currency-md text-on-surface mt-1">S/ {{ c.capital | soles }}</span></div>
+          <div class="flex flex-col"><span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">percent</span>Tasa TEA aplicada</span><span class="font-label-lg text-label-lg text-secondary font-bold mt-1">{{ c.teaPorcentaje.toFixed(4) }} %</span></div>
+          <div class="flex flex-col"><span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">hourglass_top</span>Gracia inicial</span><span class="font-label-lg text-label-lg text-primary font-bold mt-1">{{ c.diasGracia }} días</span></div>
+        </div>
+      </div>
+      <div class="lg:col-span-4 bg-gradient-to-br from-surface-container to-surface-container-high p-6 rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-primary/5 pointer-events-none"></div>
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-label-badge text-label-badge text-on-surface-variant uppercase tracking-wider flex items-center">Capital ajustado <fp-info titulo="Capital ajustado (C')" texto="Precio de la compra más los intereses de los días de gracia. Sobre este monto se calculan las cuotas." /></span>
+            <span class="bg-secondary text-on-secondary font-label-badge text-label-badge px-2 py-0.5 rounded-full">Base C'</span>
+          </div>
+          <div class="flex items-baseline gap-1"><span class="font-currency-display text-currency-display text-primary leading-none">S/ {{ c.capitalAjustado | soles }}</span></div>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-2">Incluye S/ {{ c.interesGracia | soles }} de interés por los {{ c.diasGracia }} días de gracia.</p>
+        </div>
+        <div class="mt-6 pt-4 bg-surface-container-lowest p-3.5 rounded-lg flex items-center justify-between">
+          <div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface-variant">Valor de cuota regular:</span><span class="font-headline-sm text-headline-sm text-on-surface">{{ c.filas.length }} pagos fijos</span></div>
+          <span class="font-currency-display text-currency-display text-secondary-container">S/ {{ c.cuota | soles }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="w-full bg-tertiary-fixed/20 p-5 sm:p-6 rounded-xl shadow-sm flex flex-col md:flex-row items-start md:items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center shrink-0 text-on-tertiary-fixed shadow-sm"><span class="material-symbols-outlined">lightbulb</span></div>
+      <div class="flex flex-col gap-1">
+        <div class="flex items-center gap-2 flex-wrap">
+          <h3 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">¿Cómo se calculó la gracia y por qué la cuota es exacta?</h3>
+          <span class="bg-surface-container-lowest px-2 py-0.5 rounded text-on-surface font-label-badge text-label-badge">Explicación para el mostrador</span>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface">
+          La compra se hizo el <strong>{{ c.compra.fechaHora | fecha: true }}</strong> y la fecha de pago asignada es el <strong>{{ c.compra.fechaPagoAsignada | fecha: true }}</strong>: pasaron <strong>{{ c.diasGracia }} días</strong> de gracia total.
+          El interés compensatorio de esos días (<strong class="text-primary font-bold">S/ {{ c.interesGracia | soles }}</strong>) se sumó al precio: C' = {{ c.capital | soles }} × (1 + TED)<sup>{{ c.diasGracia }}</sup> = <strong>S/ {{ c.capitalAjustado | soles }}</strong>,
+          que se paga en cuotas fijas de <strong class="text-secondary font-bold">S/ {{ c.cuota | soles }}</strong> con la TEM de {{ c.temPorcentaje.toFixed(5) }} %. ¡Cuentas claras conservan la amistad del barrio!
+        </p>
+      </div>
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-5 sm:p-6 flex flex-col gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
+        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary">table_chart</span><h3 class="font-headline-md text-headline-md text-on-surface">Tabla Francesa de Amortización Detallada</h3></div>
+        <div class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md"><span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span><span>Cuota mensual nivelada • Tasa vencida</span></div>
+      </div>
+      <div class="overflow-x-auto w-full scroll-fino">
+        <table class="w-full text-left min-w-[760px]">
+          <thead>
+            <tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+              <th class="py-3 px-4 rounded-l-lg">N° Cuota</th><th class="py-3 px-4">Fecha Venc.</th><th class="py-3 px-4 text-right">Saldo Inicial</th>
+              <th class="py-3 px-4 text-right">Interés Comp.</th><th class="py-3 px-4 text-right">Amortización</th><th class="py-3 px-4 text-right font-bold text-on-surface">Cuota</th>
+              <th class="py-3 px-4 text-right">Saldo Final</th><th class="py-3 px-4 text-center rounded-r-lg">Estado</th>
+            </tr>
+          </thead>
+          <tbody class="font-body-md text-body-md">
+            @for (f of c.filas; track f.numero; let impar = $odd; let ultimo = $last) {
+              <tr class="hover:bg-surface-container-low/70 transition-colors" [class]="impar ? 'bg-surface-container-low/30' : ''">
+                <td class="py-4 px-4 font-headline-sm text-headline-sm text-on-surface"><span class="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center font-bold">{{ f.numero }}</span></td>
+                <td class="py-4 px-4"><span class="font-label-lg text-label-lg text-on-surface">{{ f.vencimiento | fecha }}</span><span class="block font-body-sm text-[11px] text-on-surface-variant">{{ diaSemana(f.vencimiento) }} de cobro</span></td>
+                <td class="py-4 px-4 text-right font-currency-md text-currency-md tabular-nums text-on-surface">S/ {{ f.saldoInicial | soles }}</td>
+                <td class="py-4 px-4 text-right font-currency-md text-currency-md tabular-nums text-secondary">S/ {{ f.interes | soles }}</td>
+                <td class="py-4 px-4 text-right font-currency-md text-currency-md tabular-nums text-on-surface">S/ {{ f.amortizacion | soles }}</td>
+                <td class="py-4 px-4 text-right font-currency-md text-currency-md tabular-nums font-bold text-primary">S/ {{ f.cuota | soles }}</td>
+                <td class="py-4 px-4 text-right font-currency-md text-currency-md tabular-nums" [class]="ultimo ? 'font-bold text-on-tertiary-fixed-variant' : 'text-on-surface-variant'">S/ {{ f.saldoFinal | soles }}</td>
+                <td class="py-4 px-4 text-center">
+                  @if (f.pagada) { <span class="inline-block bg-[#00C853] text-[#111111] font-label-badge text-label-badge px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">PAGADA</span> }
+                  @else { <span class="inline-block bg-tertiary-fixed text-on-tertiary-fixed font-label-badge text-label-badge px-3 py-1 rounded-full uppercase tracking-wider shadow-sm transform" [class]="impar ? 'rotate-1' : '-rotate-1'">PENDIENTE</span> }
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr class="bg-surface-container-high text-on-surface font-label-lg text-label-lg">
+              <td class="py-4 px-4 font-headline-sm text-headline-sm text-on-surface uppercase rounded-l-lg" colspan="3">Totales Consolidados</td>
+              <td class="py-4 px-4 text-right font-currency-md text-currency-md tabular-nums text-secondary font-bold">S/ {{ c.totalInteres | soles }}</td>
+              <td class="py-4 px-4 text-right font-currency-md text-currency-md tabular-nums text-on-surface font-bold">S/ {{ c.totalAmortizacion | soles }}</td>
+              <td class="py-4 px-4 text-right font-currency-display text-[22px] tabular-nums font-bold text-primary">S/ {{ c.totalVentaPlazo | soles }}</td>
+              <td class="py-4 px-4 text-right font-body-sm text-[12px] text-on-surface-variant">Saldo cero</td>
+              <td class="py-4 px-4 text-center rounded-r-lg"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3">
+        <div class="bg-surface-container-low p-3.5 rounded-lg flex items-center gap-3"><span class="material-symbols-outlined text-secondary">trending_up</span><div class="flex flex-col"><span class="font-body-sm text-body-sm text-on-surface-variant">Interés total (incluye gracia):</span><span class="font-currency-md text-currency-md text-secondary">S/ {{ c.interesTotal | soles }}</span></div></div>
+        <div class="bg-surface-container-low p-3.5 rounded-lg flex items-center gap-3"><span class="material-symbols-outlined text-on-surface">account_balance</span><div class="flex flex-col"><span class="font-body-sm text-body-sm text-on-surface-variant">Capital total devuelto (C'):</span><span class="font-currency-md text-currency-md text-on-surface">S/ {{ c.totalAmortizacion | soles }}</span></div></div>
+        <div class="bg-surface-container-low p-3.5 rounded-lg flex items-center gap-3"><span class="material-symbols-outlined text-primary">payments</span><div class="flex flex-col"><span class="font-body-sm text-body-sm text-on-surface-variant">Total venta a plazo:</span><span class="font-currency-md text-currency-md text-primary font-bold">S/ {{ c.totalVentaPlazo | soles }}</span></div></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 no-print">
+      <button class="group h-14 bg-primary text-on-primary rounded-xl px-5 flex items-center justify-center gap-3 shadow-md hover:bg-primary-container active:scale-[0.99] transition-all disabled:opacity-60" type="button" [disabled]="descargando()" (click)="pdf()">
+        <span class="material-symbols-outlined">picture_as_pdf</span><span class="font-headline-sm text-headline-sm uppercase tracking-tight">{{ descargando() ? 'Generando…' : 'Descargar Cronograma PDF' }}</span>
+      </button>
+      <button class="group h-14 bg-surface-container-lowest text-on-surface hover:bg-surface-container rounded-xl px-5 flex items-center justify-center gap-3 shadow-sm active:scale-[0.99] transition-all" type="button" (click)="whatsapp()">
+        <span class="material-symbols-outlined text-[#25D366]">chat</span><span class="font-headline-sm text-headline-sm uppercase tracking-tight">Enviar por WhatsApp</span>
+      </button>
+      <button class="group h-14 bg-tertiary-fixed hover:bg-tertiary-fixed-dim text-on-tertiary-fixed rounded-xl px-5 flex items-center justify-center gap-3 shadow-sm active:scale-[0.99] transition-all" type="button" (click)="imprimir()">
+        <span class="material-symbols-outlined">print</span><span class="font-headline-sm text-headline-sm uppercase tracking-tight">Imprimir Ticket</span>
+      </button>
+    </div>
+  } @else if (!id()) {
+    <div class="p-space-xl rounded-xl bg-surface-container-lowest text-center text-on-surface-variant shadow-sm">
+      <span class="material-symbols-outlined text-[44px] text-outline">calendar_month</span>
+      <p class="font-body-md text-body-md mt-2">Elige un cliente y una compra en cuotas para ver su tabla francesa.</p>
+      <a routerLink="/nueva-compra" class="inline-flex mt-3 px-4 py-2 rounded-lg bg-primary-container text-on-primary-container font-label-lg text-label-lg">Registrar una compra en cuotas</a>
+    </div>
+  }
+</div>
+@if (ayuda()) {
+  <fp-ayuda titulo="Fórmula francesa y días de gracia" [pasos]="ayudaCrono.pasos" boton="¡Entendido!" (cerrar)="ayuda.set(false)"
+            nota="R = C' × [TEM (1+TEM)ⁿ] / [(1+TEM)ⁿ − 1]. El interés de cada cuota es el saldo × TEM y la amortización es la cuota menos el interés." />
+}

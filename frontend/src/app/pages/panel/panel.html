@@ -1,0 +1,202 @@
+@let p = panel();
+<div class="flex flex-col w-full">
+  <!-- Banner de bienvenida -->
+  <div class="w-full bg-surface-container-low px-gutter lg:px-gutter-desktop py-space-lg">
+    <div class="max-w-[1360px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+      <div>
+        <div class="flex items-center gap-space-xs mb-1">
+          <span class="font-label-badge text-label-badge bg-tertiary-fixed text-on-tertiary-fixed px-2.5 py-0.5 rounded-full shadow-sm uppercase font-bold">Negocio activo • {{ p?.ubicacion }}</span>
+          <span class="inline-flex items-center text-xs font-body-sm text-on-surface-variant font-medium">{{ turno() }}</span>
+        </div>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">¡{{ saludo() }}, {{ nombre() }}! 👋</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">Revisa los fiados de hoy, registra pagos con Yape o efectivo y mantén la libreta del barrio al día.</p>
+      </div>
+      <div class="flex items-center gap-space-sm shrink-0">
+        <button class="group flex items-center gap-space-xs px-space-md py-3 rounded-lg bg-surface-container-lowest text-on-surface shadow-sm hover:shadow-md transition-all" type="button" (click)="ayuda.set(true)">
+          <span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">info</span>
+          <span class="font-label-lg text-label-lg font-bold">¿Cómo funciona este panel?</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-[1360px] mx-auto w-full px-gutter lg:px-gutter-desktop py-space-xl flex flex-col gap-space-xl">
+    <!-- 3 tarjetas resumen -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+      <div class="relative bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col justify-between overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-primary-fixed/20 pointer-events-none"></div>
+        <div class="flex items-center justify-between mb-space-sm">
+          <span class="font-label-badge text-label-badge tracking-wider uppercase text-on-surface-variant flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px] text-primary">menu_book</span>POR COBRAR EN EL NEGOCIO
+          </span>
+          <span class="text-on-surface-variant" title="Saldos al corte pendientes más la mora a la fecha y lo que vence en el próximo corte"><span class="material-symbols-outlined text-[18px]">help_outline</span></span>
+        </div>
+        <div class="flex items-baseline gap-1 my-1">
+          <span class="font-currency-display text-headline-sm text-primary font-bold">S/</span>
+          <span class="font-currency-display text-display-lg-mobile md:text-display-lg text-on-surface tabular-nums tracking-tight">{{ p?.totalPorCobrar | soles }}</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1 flex items-center gap-1.5">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-secondary-container"></span>
+          <strong>{{ p?.clientesConSaldo ?? 0 }} vecinos</strong> con saldo pendiente activo
+        </p>
+        <div class="mt-space-md pt-space-sm bg-surface-container-low px-space-sm py-2 rounded-lg flex items-center justify-between text-on-surface">
+          <span class="font-body-sm text-body-sm">Límite global del negocio:</span>
+          <span class="font-label-md text-label-md font-bold text-on-surface-variant">S/ {{ p?.limiteGlobal | soles }}</span>
+        </div>
+      </div>
+
+      <div class="relative bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col justify-between overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-tertiary-fixed/30 pointer-events-none"></div>
+        <div class="flex items-center justify-between mb-space-sm">
+          <span class="font-label-badge text-label-badge tracking-wider uppercase text-on-surface-variant flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px] text-tertiary">event_upcoming</span>PRÓXIMO CORTE {{ p?.proximoCorte | fecha: true }}
+          </span>
+          <div class="rotate-[-2deg] bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded-full font-label-badge text-label-badge shadow-sm">{{ (p?.diasParaCorte ?? 0) === 0 ? '¡HOY!' : '¡EN FECHA!' }}</div>
+        </div>
+        <div class="flex items-baseline gap-1 my-1">
+          <span class="font-currency-display text-headline-sm text-secondary font-bold">S/</span>
+          <span class="font-currency-display text-display-lg-mobile md:text-display-lg text-on-surface tabular-nums tracking-tight">{{ p?.montoProximoCorte | soles }}</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+          Corte en <strong>{{ p?.diasParaCorte ?? 0 }} {{ p?.diasParaCorte === 1 ? 'día' : 'días' }}</strong> (Pago límite: {{ p?.proximoPago | fecha: true }})
+        </p>
+        <div class="mt-space-md pt-space-sm bg-surface-container-low px-space-sm py-2 rounded-lg flex items-center justify-between">
+          <span class="font-body-sm text-body-sm text-on-surface-variant">TEA compensatoria base:</span>
+          <span class="font-label-md text-label-md text-tertiary font-bold">{{ p?.teaBasePorcentaje?.toFixed(4) }} %</span>
+        </div>
+      </div>
+
+      <div class="relative bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col justify-between overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-error-container/30 pointer-events-none"></div>
+        <div class="flex items-center justify-between mb-space-sm">
+          <span class="font-label-badge text-label-badge tracking-wider uppercase text-error flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">warning</span>CLIENTES EN MORA
+          </span>
+          @if ((p?.clientesEnMora ?? 0) > 0) {
+            <div class="rotate-[2deg] bg-error text-on-error px-2 py-0.5 rounded-full font-label-badge text-label-badge shadow-sm">MORA ACTIVA</div>
+          } @else {
+            <div class="rotate-[2deg] bg-[#00C853] text-[#111111] px-2 py-0.5 rounded-full font-label-badge text-label-badge shadow-sm">SIN MORA</div>
+          }
+        </div>
+        <div class="flex items-baseline gap-1 my-1">
+          <span class="font-currency-display text-headline-sm text-error font-bold">S/</span>
+          <span class="font-currency-display text-display-lg-mobile md:text-display-lg text-error tabular-nums tracking-tight">{{ p?.montoEnMora | soles }}</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1"><strong>{{ p?.clientesEnMora ?? 0 }} vecinos atrasados</strong> con recargo diario activo</p>
+        <div class="mt-space-md pt-space-sm bg-error-container/40 px-space-sm py-2 rounded-lg flex items-center justify-between">
+          <span class="font-body-sm text-body-sm text-on-error-container">TEA moratoria pactada:</span>
+          <span class="font-label-md text-label-md text-error font-bold">{{ p?.teaMoraBasePorcentaje?.toFixed(4) }} %</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Caja rápida -->
+    <div class="bg-surface-container-low p-space-md rounded-xl flex flex-col md:flex-row items-center justify-between gap-space-md">
+      <div class="flex items-center gap-space-sm w-full md:w-auto">
+        <span class="material-symbols-outlined text-primary text-[28px]">point_of_sale</span>
+        <div>
+          <h2 class="font-headline-sm text-headline-sm text-on-surface">Operaciones de Caja Rápida</h2>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">Acciones directas para atender al cliente en mostrador</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap sm:flex-nowrap items-center gap-space-sm w-full md:w-auto">
+        <a routerLink="/nueva-compra" class="w-full sm:w-auto px-space-lg py-3 rounded-lg bg-primary-container text-on-primary-container font-headline-sm text-headline-sm hover:opacity-95 shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95">
+          <span class="material-symbols-outlined text-[20px]">add_shopping_cart</span>NUEVA COMPRA FIADA
+        </a>
+        <a routerLink="/pagos" class="w-full sm:w-auto px-space-lg py-3 rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm hover:bg-surface-container shadow-sm flex items-center justify-center gap-2 transition-transform active:scale-95">
+          <span class="material-symbols-outlined text-secondary text-[20px]">payments</span>REGISTRAR PAGO
+        </a>
+        <a routerLink="/clientes/nuevo" class="w-full sm:w-auto px-space-md py-3 rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm hover:bg-surface-container shadow-sm flex items-center justify-center gap-2 transition-transform active:scale-95">
+          <span class="material-symbols-outlined text-primary text-[20px]">person_add</span>AGREGAR CLIENTE
+        </a>
+      </div>
+    </div>
+
+    <!-- Vecinos y cuentas -->
+    <div class="flex flex-col gap-space-md">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">Vecinos y Cuentas Corrientes</h2>
+            <span class="font-label-badge text-label-badge bg-surface-container-high px-2 py-0.5 rounded-full text-on-surface">{{ p?.totalClientes ?? 0 }} Registrados</span>
+          </div>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">Control exacto del saldo al corte, moras y créditos del barrio</p>
+        </div>
+        <div class="flex items-center gap-space-sm w-full md:w-auto">
+          <div class="relative w-full md:w-80">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+            <input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant/60 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                   placeholder="Buscar por vecino o DNI..." type="text" [ngModel]="buscar()" (ngModelChange)="buscar.set($event)" />
+          </div>
+          <button class="p-2.5 bg-surface-container-lowest text-on-surface rounded-lg shadow-sm hover:bg-surface-container transition-colors flex items-center gap-1" [title]="'Filtro: ' + filtro()" type="button" (click)="siguienteFiltro()">
+            <span class="material-symbols-outlined text-[20px]">filter_list</span>
+            @if (filtro() !== 'todos') { <span class="font-label-badge text-label-badge uppercase">{{ filtro() === 'mora' ? 'Mora' : 'Al día' }}</span> }
+          </button>
+        </div>
+      </div>
+      <fp-tabla-clientes [clientes]="clientes()" [tienda]="p?.tienda ?? ''" [porPagina]="6"
+        [pie]="'TEA compensatoria promedio ' + (p?.teaBasePorcentaje?.toFixed(4) ?? '') + ' % | TEA moratoria promedio ' + (p?.teaMoraBasePorcentaje?.toFixed(4) ?? '') + ' %'" />
+    </div>
+
+    <!-- Tarjetas informativas -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
+      <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-space-sm">
+            <span class="font-label-badge text-label-badge text-secondary font-bold uppercase">Mensaje al WhatsApp</span>
+            <span class="material-symbols-outlined text-secondary">send</span>
+          </div>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">Plantillas Rápidas de Amistad</h3>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+            @if (primerMoroso(); as c) {
+              "Hola {{ c.nombres.split(' ')[0] }}, te saluda {{ nombre() }} de {{ p?.tienda }}. Te recuerdo con cariño tu estado de cuenta de S/ {{ c.totalACobrar | soles }}. Puedes pagarlo con Yape o Plin."
+            } @else {
+              "Hola vecino, te saluda {{ nombre() }}. ¡Gracias por estar al día con tu libreta!"
+            }
+          </p>
+        </div>
+        <div class="mt-space-md">
+          <a routerLink="/corte" class="w-full py-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-bold flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">edit_note</span>Enviar estados de cuenta
+          </a>
+        </div>
+      </div>
+      <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-space-sm">
+            <span class="font-label-badge text-label-badge text-tertiary font-bold uppercase">Rotación de Mercadería</span>
+            <span class="material-symbols-outlined text-tertiary">inventory_2</span>
+          </div>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">Lo que más se fía en el mes</h3>
+          <ul class="mt-space-sm flex flex-col gap-2 font-body-sm text-body-sm text-on-surface">
+            @for (t of p?.topProductos ?? []; track t.nombre) {
+              <li class="flex items-center justify-between py-1 bg-surface-container-low px-space-sm rounded"><span>{{ t.nombre }}</span><strong>S/ {{ t.monto | soles }}</strong></li>
+            } @empty {
+              <li class="py-1 px-space-sm text-on-surface-variant">Sin fiados en los últimos 30 días.</li>
+            }
+          </ul>
+        </div>
+        <div class="mt-space-md flex items-center justify-between text-on-surface-variant text-xs">
+          <span>Últimos 30 días</span>
+          <a routerLink="/catalogo" class="font-bold text-primary">Ver Catálogo</a>
+        </div>
+      </div>
+      <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-md flex flex-col overflow-hidden">
+        <div class="relative w-full h-44 rounded-lg overflow-hidden mb-space-sm">
+          <img class="w-full h-full object-cover" alt="Bodega peruana de barrio" src="assets/img/bodega-interior.jpg" />
+          <div class="absolute bottom-2 left-2 bg-inverse-surface/80 text-inverse-on-surface px-2.5 py-1 rounded font-label-badge text-label-badge">{{ p?.tienda }} • {{ p?.ubicacion }}</div>
+        </div>
+        <div class="flex flex-col flex-1 justify-between">
+          <p class="font-body-sm text-body-sm text-on-surface-variant">"Cuentas claras mantienen la amistad y la confianza del barrio." Cada operación queda guardada en la bitácora.</p>
+          <a routerLink="/bitacora" class="mt-2 flex items-center gap-2 text-xs font-bold text-[#00C853]">
+            <span class="material-symbols-outlined text-[16px]">cloud_done</span>Ver bitácora de movimientos
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+@if (ayuda()) {
+  <fp-ayuda titulo="Guía rápida del panel" [pasos]="ayudaPanel.pasos" boton="¡Entendido, volver a la libreta!" (cerrar)="ayuda.set(false)" />
+}
+
