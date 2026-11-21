@@ -1,5 +1,5 @@
 @let k = corte();
-<div class="max-w-[1360px] mx-auto w-full px-gutter md:px-gutter-desktop py-space-lg flex flex-col gap-space-lg">
+<div class="max-w-[88rem] mx-auto w-full px-gutter md:px-gutter-desktop py-space-lg flex flex-col gap-space-lg">
   <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
     <div class="flex flex-col gap-1">
       <div class="flex items-center gap-2">
@@ -8,7 +8,7 @@
       </div>
       <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface tracking-tight">CORTE MENSUAL DE CUENTAS CORRIENTES</h1>
       <p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1.5 flex-wrap">
-        <span class="material-symbols-outlined text-[18px]">event</span>Cortes de {{ meses[mes() - 1] }} de {{ anio() }} — <span class="font-headline-sm text-headline-sm text-on-surface">{{ auth.perfil()?.tienda?.razonSocial }}</span>
+        <span class="material-symbols-outlined text-[1.125rem]">event</span>Cortes de {{ meses[mes() - 1] }} de {{ anio() }} — <span class="font-headline-sm text-headline-sm text-on-surface">{{ auth.perfil()?.tienda?.razonSocial }}</span>
       </p>
     </div>
     <div class="flex items-center gap-space-sm flex-wrap">
@@ -23,7 +23,7 @@
         <button type="button" class="p-2 rounded hover:bg-surface-container" (click)="cambiarMes(1)" title="Mes siguiente"><span class="material-symbols-outlined">chevron_right</span></button>
       </div>
       <button class="group flex items-center gap-2 px-space-md py-3 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all shadow-sm active:translate-y-0.5" type="button" (click)="ayuda.set(true)">
-        <div class="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center font-headline-sm text-[13px]">i</div>
+        <div class="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center font-headline-sm text-[0.90625rem]">i</div>
         <span class="font-label-lg text-label-lg group-hover:text-primary transition-colors">¿Cómo funciona el corte mensual?</span>
       </button>
     </div>
@@ -41,13 +41,13 @@
       <div class="flex items-center justify-between pb-space-sm"><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wide">Estados de cuenta</span><span class="material-symbols-outlined text-secondary">fact_check</span></div>
       <div class="flex items-baseline gap-2"><span class="font-currency-display text-currency-display text-on-surface">{{ generados() }}</span><span class="font-headline-sm text-headline-sm text-on-surface-variant">generados</span></div>
       <span class="font-body-sm text-body-sm text-on-surface-variant mt-1">{{ generables().length }} listos para generar y enviar</span>
-      <div class="flex items-center gap-1.5 pt-space-xs text-secondary"><span class="material-symbols-outlined text-[18px]">verified</span><span class="font-label-md text-label-md">Cuadrado con la libreta de compras</span></div>
+      <div class="flex items-center gap-1.5 pt-space-xs text-secondary"><span class="material-symbols-outlined text-[1.125rem]">verified</span><span class="font-label-md text-label-md">Cuadrado con la libreta de compras</span></div>
     </div>
     <div class="relative overflow-hidden bg-surface-container-lowest rounded-xl p-space-md flex flex-col justify-between shadow-sm">
       <div class="flex items-center justify-between pb-space-sm"><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wide">Fecha límite sin recargo</span><span class="material-symbols-outlined text-tertiary">event_available</span></div>
       <span class="font-currency-display text-currency-display text-on-surface">{{ fechaPagoComun() | fecha }}</span>
       <div class="flex items-center gap-2 mt-1">
-        <span class="font-label-badge text-label-badge bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded-full inline-flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">alarm</span> CORTE {{ fechaCorteComun() | fecha: true }}</span>
+        <span class="font-label-badge text-label-badge bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded-full inline-flex items-center gap-1"><span class="material-symbols-outlined text-[0.90625rem]">alarm</span> CORTE {{ fechaCorteComun() | fecha: true }}</span>
         <span class="font-body-sm text-body-sm text-on-surface-variant">Cada cliente tiene sus días</span>
       </div>
       <div class="w-full bg-surface-container-highest rounded-full h-1.5 mt-space-sm overflow-hidden"><div class="bg-tertiary-container h-full rounded-full w-2/3"></div></div>
@@ -69,16 +69,16 @@
         <span class="font-label-lg text-label-lg text-on-surface">Seleccionar todos los listos ({{ seleccion().size }} de {{ generables().length }})</span>
       </label>
       <div class="relative w-full sm:w-64">
-        <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+        <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-[1.125rem]">search</span>
         <input class="w-full bg-surface-container-lowest text-on-surface pl-8 pr-3 py-1.5 text-body-sm rounded-lg outline-none focus:ring-2 focus:ring-primary-container placeholder:text-on-surface-variant/60" placeholder="Buscar por vecino o DNI..." [ngModel]="q()" (ngModelChange)="q.set($event)" />
       </div>
     </div>
     <div class="w-full overflow-x-auto scroll-fino">
-      <table class="w-full text-left min-w-[980px]">
+      <table class="w-full text-left min-w-[61.25rem]">
         <thead class="bg-surface-container text-on-surface-variant font-label-badge text-label-badge uppercase tracking-wider">
           <tr>
-            <th class="py-3 px-space-md w-12 text-center">Sel.</th><th class="py-3 px-space-md">Vecino / Identificación</th><th class="py-3 px-space-md">Desglose de consumos</th>
-            <th class="py-3 px-space-md text-right">Saldo al corte</th><th class="py-3 px-space-md">Vence</th><th class="py-3 px-space-md text-center">Estado</th><th class="py-3 px-space-md text-right">Acciones</th>
+            <th class="whitespace-nowrap py-3 px-space-md w-12 text-center">Sel.</th><th class="whitespace-nowrap py-3 px-space-md">Vecino / Identificación</th><th class="whitespace-nowrap py-3 px-space-md">Desglose de consumos</th>
+            <th class="whitespace-nowrap py-3 px-space-md text-right">Saldo al corte</th><th class="whitespace-nowrap py-3 px-space-md">Vence</th><th class="whitespace-nowrap py-3 px-space-md text-center">Estado</th><th class="whitespace-nowrap py-3 px-space-md text-right">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-surface-container">
@@ -92,7 +92,7 @@
               <td class="py-4 px-space-md">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-full flex items-center justify-center font-headline-sm uppercase shrink-0" [class]="i % 2 ? 'bg-secondary-fixed text-secondary' : 'bg-primary-fixed text-primary'">{{ c.nombres | iniciales }}</div>
-                  <div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface">{{ c.nombres }}</span><span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">badge</span> DNI {{ c.dni }}</span></div>
+                  <div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface">{{ c.nombres }}</span><span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[0.9375rem]">badge</span> DNI {{ c.dni }}</span></div>
                 </div>
               </td>
               <td class="py-4 px-space-md max-w-sm">
@@ -100,17 +100,17 @@
                   @for (it of c.items; track $index) {
                     <div class="flex items-center justify-between gap-3 text-body-sm">
                       <span class="text-on-surface font-body-sm"><strong class="font-label-md">{{ it.fecha | fecha: true }}:</strong> {{ it.detalle }}</span>
-                      <span class="font-currency-md text-[16px] text-on-surface font-semibold whitespace-nowrap">S/ {{ it.total | soles }}</span>
+                      <span class="font-currency-md text-[1rem] text-on-surface font-semibold whitespace-nowrap">S/ {{ it.total | soles }}</span>
                     </div>
                   } @empty { <span class="font-body-sm text-body-sm text-on-surface-variant">Sin consumos en este corte</span> }
                   @for (n of c.notas; track $index) {
-                    <span class="inline-flex items-center gap-1 font-label-badge text-[11px] text-secondary font-bold"><span class="material-symbols-outlined text-[13px]">info</span> {{ n }}</span>
+                    <span class="inline-flex items-center gap-1 font-label-badge text-[0.8125rem] text-secondary font-bold"><span class="material-symbols-outlined text-[0.90625rem]">info</span> {{ n }}</span>
                   }
                 </div>
               </td>
               <td class="py-4 px-space-md text-right whitespace-nowrap">
-                <span class="font-currency-display text-[24px] text-primary font-bold">S/ {{ c.total | soles }}</span>
-                <span class="block font-body-sm text-[12px] text-on-surface-variant">Corte {{ c.fechaCorte | fecha: true }} · sin mora</span>
+                <span class="font-currency-display text-[1.5rem] text-primary font-bold">S/ {{ c.total | soles }}</span>
+                <span class="block font-body-sm text-[0.84375rem] text-on-surface-variant">Corte {{ c.fechaCorte | fecha: true }} · sin mora</span>
               </td>
               <td class="py-4 px-space-md whitespace-nowrap">
                 <span class="font-label-lg text-label-lg text-on-surface">{{ c.fechaPago | fecha }}</span>
@@ -121,12 +121,12 @@
               <td class="py-4 px-space-md text-right whitespace-nowrap">
                 <div class="inline-flex items-center gap-1.5">
                   <button class="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors" type="button" (click)="detalle.set(c)">Ver Detalle</button>
-                  <button class="p-1.5 rounded-lg bg-surface-container hover:bg-secondary-fixed text-secondary transition-colors" title="Enviar por WhatsApp" type="button" (click)="whatsapp(c)" [disabled]="!c.items.length"><span class="material-symbols-outlined text-[18px]">chat</span></button>
+                  <button class="p-1.5 rounded-lg bg-surface-container hover:bg-secondary-fixed text-secondary transition-colors" title="Enviar por WhatsApp" type="button" (click)="whatsapp(c)" [disabled]="!c.items.length"><span class="material-symbols-outlined text-[1.125rem]">chat</span></button>
                   @if (c.idEstado) {
-                    <button class="p-1.5 rounded-lg bg-surface-container hover:bg-primary-fixed text-primary transition-colors" title="Descargar estado en PDF" type="button" (click)="pdf(c)"><span class="material-symbols-outlined text-[18px]">picture_as_pdf</span></button>
+                    <button class="p-1.5 rounded-lg bg-surface-container hover:bg-primary-fixed text-primary transition-colors" title="Descargar estado en PDF" type="button" (click)="pdf(c)"><span class="material-symbols-outlined text-[1.125rem]">picture_as_pdf</span></button>
                   }
                   @if (c.generado && c.estado === 'PENDIENTE') {
-                    <a [routerLink]="['/pagos']" [queryParams]="{ cliente: c.idCliente }" class="p-1.5 rounded-lg bg-surface-container hover:bg-tertiary-fixed text-on-surface transition-colors" title="Registrar pago"><span class="material-symbols-outlined text-[18px]">payments</span></a>
+                    <a [routerLink]="['/pagos']" [queryParams]="{ cliente: c.idCliente }" class="p-1.5 rounded-lg bg-surface-container hover:bg-tertiary-fixed text-on-surface transition-colors" title="Registrar pago"><span class="material-symbols-outlined text-[1.125rem]">payments</span></a>
                   }
                 </div>
               </td>
@@ -164,7 +164,7 @@
           <span class="font-body-sm text-body-sm text-on-surface-variant">Se genera el estado de cuenta de cada cliente seleccionado y se le envía en PDF a su correo.</span>
         </div>
       </div>
-      <button class="w-full md:w-auto h-[54px] px-space-lg rounded-lg bg-primary-container hover:opacity-95 active:scale-[0.99] text-on-primary font-headline-sm text-headline-sm uppercase tracking-wide flex items-center justify-center gap-space-sm shadow-md transition-all shrink-0 disabled:opacity-50"
+      <button class="w-full md:w-auto h-[3.4rem] px-space-lg rounded-lg bg-primary-container hover:opacity-95 active:scale-[0.99] text-on-primary font-headline-sm text-headline-sm uppercase tracking-wide flex items-center justify-center gap-space-sm shadow-md transition-all shrink-0 disabled:opacity-50"
               type="button" [disabled]="!seleccion().size || enviando()" (click)="generar()">
         <span class="material-symbols-outlined">send</span><span>{{ enviando() ? 'Generando…' : 'Generar y enviar estados de cuenta (' + seleccion().size + ')' }}</span>
       </button>
@@ -179,21 +179,21 @@
       <div class="p-space-lg flex flex-col gap-space-md">
         <div class="flex items-start justify-between">
           <div class="flex flex-col"><h2 class="font-headline-md text-headline-md text-on-surface">{{ d.nombres }}</h2><span class="font-body-sm text-body-sm text-on-surface-variant">DNI {{ d.dni }} · corte {{ d.fechaCorte | fecha }} · paga {{ d.fechaPago | fecha }}</span></div>
-          <button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors" type="button" (click)="detalle.set(null)"><span class="material-symbols-outlined text-[18px]">close</span></button>
+          <button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors" type="button" (click)="detalle.set(null)"><span class="material-symbols-outlined text-[1.125rem]">close</span></button>
         </div>
         <ul class="flex flex-col gap-1.5 font-body-sm text-body-sm text-on-surface">
           @for (it of d.items; track $index) {
             <li class="flex items-start justify-between gap-2 p-2 rounded bg-surface-container-low">
-              <span><strong>{{ it.fecha | fecha: true }}</strong> · {{ it.detalle }}<span class="block text-[12px] text-on-surface-variant">{{ it.tipo === 'CUOTA' ? 'Amortización ' + (it.monto | soles) + ' + interés ' + (it.interes | soles) : 'Capital ' + (it.monto | soles) + ' + interés ' + (it.interes | soles) + ' (' + it.dias + ' días)' }}</span></span>
+              <span><strong>{{ it.fecha | fecha: true }}</strong> · {{ it.detalle }}<span class="block text-[0.84375rem] text-on-surface-variant">{{ it.tipo === 'CUOTA' ? 'Amortización ' + (it.monto | soles) + ' + interés ' + (it.interes | soles) : 'Capital ' + (it.monto | soles) + ' + interés ' + (it.interes | soles) + ' (' + it.dias + ' días)' }}</span></span>
               <strong class="whitespace-nowrap">S/ {{ it.total | soles }}</strong>
             </li>
           }
-          @for (n of d.notas; track $index) { <li class="p-2 rounded bg-secondary-fixed/40 text-on-secondary-fixed text-[12px]">{{ n }}</li> }
+          @for (n of d.notas; track $index) { <li class="p-2 rounded bg-secondary-fixed/40 text-on-secondary-fixed text-[0.84375rem]">{{ n }}</li> }
         </ul>
         <div class="flex items-center justify-between p-3 rounded-lg bg-tertiary-fixed/40"><span class="font-label-lg text-label-lg">Saldo al corte</span><span class="font-currency-display text-currency-display text-primary font-bold">S/ {{ d.total | soles }}</span></div>
         <div class="flex justify-end gap-space-sm">
           <button class="px-space-md py-2 rounded-lg bg-surface-container-highest text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors" type="button" (click)="detalle.set(null)">Cerrar</button>
-          <button class="px-space-md py-2 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm hover:opacity-90 flex items-center gap-1.5 transition-colors" type="button" (click)="whatsapp(d)"><span class="material-symbols-outlined text-[18px]">chat</span>WhatsApp</button>
+          <button class="px-space-md py-2 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm hover:opacity-90 flex items-center gap-1.5 transition-colors" type="button" (click)="whatsapp(d)"><span class="material-symbols-outlined text-[1.125rem]">chat</span>WhatsApp</button>
         </div>
       </div>
     </div>

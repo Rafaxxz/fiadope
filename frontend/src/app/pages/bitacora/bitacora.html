@@ -1,10 +1,10 @@
 @let p = pagina();
-<div class="w-full max-w-[1360px] mx-auto px-gutter lg:px-gutter-desktop py-space-xl flex flex-col gap-space-lg">
+<div class="w-full max-w-[88rem] mx-auto px-gutter lg:px-gutter-desktop py-space-xl flex flex-col gap-space-lg">
   <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
     <div class="flex flex-col gap-space-xs max-w-3xl">
       <div class="flex flex-wrap items-center gap-space-sm">
         <span class="bg-primary-container text-on-primary font-label-badge text-label-badge px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">SEGURIDAD ANTIFRAUDE</span>
-        <span class="bg-tertiary-fixed text-on-tertiary-fixed font-label-badge text-label-badge px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">lock</span>REGISTRO INALTERABLE</span>
+        <span class="bg-tertiary-fixed text-on-tertiary-fixed font-label-badge text-label-badge px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-[0.9375rem]">lock</span>REGISTRO INALTERABLE</span>
         <span class="text-on-surface-variant font-label-md text-label-md hidden sm:inline">{{ tienda() ?? auth.perfil()?.tienda?.razonSocial ?? 'Toda la plataforma' }}</span>
       </div>
       <h1 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight mt-1">BITÁCORA DE MOVIMIENTOS Y AUDITORÍA</h1>
@@ -79,14 +79,14 @@
   <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
     <div class="p-space-md sm:p-space-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm bg-surface-container-low">
       <div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm text-on-surface">Movimientos registrados</span><span class="bg-surface-container-highest text-on-surface-variant font-label-badge text-label-badge px-2 py-0.5 rounded-full">{{ p?.contenido?.length ?? 0 }} mostrados</span></div>
-      <div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[18px]">lock</span>Solo lectura: no se pueden modificar ni borrar.</div>
+      <div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[1.125rem]">lock</span>Solo lectura: no se pueden modificar ni borrar.</div>
     </div>
     <div class="w-full overflow-x-auto scroll-fino">
-      <table class="w-full text-left border-collapse min-w-[1000px]">
+      <table class="w-full text-left border-collapse min-w-[62.5rem]">
         <thead>
           <tr class="bg-surface-container text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
-            <th class="py-3 px-4">Fecha y hora</th><th class="py-3 px-4">Usuario</th><th class="py-3 px-4">Acción realizada</th>
-            <th class="py-3 px-4">Valor anterior</th><th class="py-3 px-4">Valor nuevo</th><th class="py-3 px-4">Dirección IP</th><th class="py-3 px-4 text-center">Estado</th>
+            <th class="whitespace-nowrap py-3 px-4">Fecha y hora</th><th class="whitespace-nowrap py-3 px-4">Usuario</th><th class="whitespace-nowrap py-3 px-4">Acción realizada</th>
+            <th class="whitespace-nowrap py-3 px-4">Valor anterior</th><th class="whitespace-nowrap py-3 px-4">Valor nuevo</th><th class="whitespace-nowrap py-3 px-4">Dirección IP</th><th class="whitespace-nowrap py-3 px-4 text-center">Estado</th>
           </tr>
         </thead>
         <tbody class="font-body-sm text-body-sm text-on-surface">
@@ -95,27 +95,27 @@
             @let antes = campos(r.valorAntes);
             @let despues = campos(r.valorDespues);
             <tr class="hover:bg-surface-container-low transition-colors align-top" [class]="impar ? 'bg-surface-container-low/40' : ''">
-              <td class="py-4 px-4 font-label-md text-label-md text-on-surface whitespace-nowrap"><div class="flex flex-col"><span>{{ r.fechaHora | fecha }}</span><span class="text-on-surface-variant font-body-sm text-[12px]">{{ r.fechaHora.substring(11, 19) }}</span></div></td>
+              <td class="py-4 px-4 font-label-md text-label-md text-on-surface whitespace-nowrap"><div class="flex flex-col"><span>{{ r.fechaHora | fecha }}</span><span class="text-on-surface-variant font-body-sm text-[0.84375rem]">{{ r.fechaHora.substring(11, 19) }}</span></div></td>
               <td class="py-4 px-4 whitespace-nowrap">
                 <div class="flex items-center gap-2">
-                  <div class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-[11px]">{{ (r.usuario ?? '?').substring(0, 2) }}</div>
+                  <div class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-[0.8125rem]">{{ (r.usuario ?? '?').substring(0, 2) }}</div>
                   <span class="font-label-md text-label-md text-on-surface font-mono">{{ r.usuario ?? 'desconocido' }}</span>
                 </div>
               </td>
               <td class="py-4 px-4">
                 <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full shrink-0" [class]="color(r.accion)"></span><span class="font-label-lg text-label-lg text-on-surface">{{ nombre(r.accion) }}</span></div>
-                <span class="text-on-surface-variant text-[12px] block">{{ r.tabla }}{{ r.idRegistro ? ' #' + r.idRegistro : '' }}</span>
+                <span class="text-on-surface-variant text-[0.84375rem] block">{{ r.tabla }}{{ r.idRegistro ? ' #' + r.idRegistro : '' }}</span>
               </td>
               <td class="py-4 px-4 max-w-[220px]">
-                @for (c of (abierto() === r.id ? antes : antes.slice(0, 3)); track c.k) { <span class="block text-[12px]"><span class="text-on-surface-variant">{{ c.k }}:</span> <span class="bg-error-container/60 text-on-error-container px-1 rounded">{{ c.v }}</span></span> }
+                @for (c of (abierto() === r.id ? antes : antes.slice(0, 3)); track c.k) { <span class="block text-[0.84375rem]"><span class="text-on-surface-variant">{{ c.k }}:</span> <span class="bg-error-container/60 text-on-error-container px-1 rounded">{{ c.v }}</span></span> }
                 @if (!antes.length) { <span class="text-on-surface-variant">—</span> }
               </td>
               <td class="py-4 px-4 max-w-[260px]">
-                @for (c of (abierto() === r.id ? despues : despues.slice(0, 3)); track c.k) { <span class="block text-[12px]"><span class="text-on-surface-variant">{{ c.k }}:</span> <span class="bg-surface-container px-1 rounded font-semibold">{{ c.v }}</span></span> }
+                @for (c of (abierto() === r.id ? despues : despues.slice(0, 3)); track c.k) { <span class="block text-[0.84375rem]"><span class="text-on-surface-variant">{{ c.k }}:</span> <span class="bg-surface-container px-1 rounded font-semibold">{{ c.v }}</span></span> }
                 @if (!despues.length) { <span class="text-on-surface-variant">—</span> }
-                @if (antes.length > 3 || despues.length > 3) { <button type="button" class="text-primary text-[12px] font-bold" (click)="abierto.set(abierto() === r.id ? null : r.id)">{{ abierto() === r.id ? 'Ver menos' : 'Ver todo' }}</button> }
+                @if (antes.length > 3 || despues.length > 3) { <button type="button" class="text-primary text-[0.84375rem] font-bold" (click)="abierto.set(abierto() === r.id ? null : r.id)">{{ abierto() === r.id ? 'Ver menos' : 'Ver todo' }}</button> }
               </td>
-              <td class="py-4 px-4 whitespace-nowrap"><span class="font-mono text-on-surface font-semibold text-[13px]">{{ r.ip }}</span></td>
+              <td class="py-4 px-4 whitespace-nowrap"><span class="font-mono text-on-surface font-semibold text-[0.90625rem]">{{ r.ip }}</span></td>
               <td class="py-4 px-4 text-center whitespace-nowrap">
                 @if (alerta(r.accion)) { <span class="inline-block bg-error text-on-error font-label-badge text-label-badge px-3 py-1 rounded-full uppercase shadow-sm transform rotate-1">ALERTA</span> }
                 @else { <span class="inline-block bg-tertiary-fixed text-on-tertiary-fixed font-label-badge text-label-badge px-3 py-1 rounded-full uppercase shadow-sm transform -rotate-1">CONFORME</span> }
@@ -130,9 +130,9 @@
     <div class="bg-surface-container-low px-space-md py-3 flex flex-col sm:flex-row items-center justify-between gap-space-sm font-label-md text-label-md text-on-surface-variant">
       <span>Página {{ numero() + 1 }} de {{ p?.totalPaginas || 1 }} · {{ p?.total ?? 0 }} registros</span>
       <div class="flex items-center gap-1">
-        <button type="button" class="p-1 rounded bg-surface-container hover:bg-surface-container-lowest text-on-surface disabled:opacity-40" [disabled]="numero() === 0" (click)="buscar(numero() - 1)"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+        <button type="button" class="p-1 rounded bg-surface-container hover:bg-surface-container-lowest text-on-surface disabled:opacity-40" [disabled]="numero() === 0" (click)="buscar(numero() - 1)"><span class="material-symbols-outlined text-[1.125rem]">chevron_left</span></button>
         <span class="px-3 py-1 rounded bg-primary-container text-on-primary font-bold">{{ numero() + 1 }}</span>
-        <button type="button" class="p-1 rounded bg-surface-container hover:bg-surface-container-lowest text-on-surface disabled:opacity-40" [disabled]="numero() + 1 >= (p?.totalPaginas ?? 1)" (click)="buscar(numero() + 1)"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+        <button type="button" class="p-1 rounded bg-surface-container hover:bg-surface-container-lowest text-on-surface disabled:opacity-40" [disabled]="numero() + 1 >= (p?.totalPaginas ?? 1)" (click)="buscar(numero() + 1)"><span class="material-symbols-outlined text-[1.125rem]">chevron_right</span></button>
       </div>
     </div>
   </div>

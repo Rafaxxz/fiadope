@@ -4,8 +4,16 @@
 
 @layer base {
   html, body { margin: 0; padding: 0; }
+  /* Escala general: todo el diseño usa rem, así que crece con la pantalla */
+  html { font-size: 15px; -webkit-text-size-adjust: 100%; }
+  @media (min-width: 640px) { html { font-size: 16px; } }
+  @media (min-width: 1536px) { html { font-size: 17px; } }
+  @media (min-width: 1800px) { html { font-size: 18px; } }
+  @media (min-width: 2400px) { html { font-size: 20px; } }
   body { overscroll-behavior: none; font-family: Inter, system-ui, sans-serif; }
   [hidden] { display: none !important; }
+  /* Iconos en rem para que crezcan junto con el texto (las clases text-* los siguen ajustando) */
+  .material-symbols-outlined { font-size: 1.5rem; }
 }
 
 .chicha-gradient { background: linear-gradient(90deg, #E6007E 0%, #FF6B00 50%, #FFE600 100%); }
@@ -16,10 +24,10 @@
 .scroll-fino::-webkit-scrollbar-thumb { background: #e2bdc7; border-radius: 9999px; }
 
 /* Campos de formulario con el estilo de los mockups */
-.campo { @apply w-full px-3 py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:outline-none shadow-sm focus:shadow-[2px_3px_0px_#1c1b1b] transition-all; }
+.campo { @apply w-full px-3.5 py-3 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:outline-none shadow-sm focus:shadow-[2px_3px_0px_#1c1b1b] transition-all; }
 .campo.invalido { @apply ring-2 ring-error bg-error-container/30; }
 .etiqueta { @apply font-label-lg text-label-lg text-on-surface flex items-center gap-1; }
-.error-campo { @apply font-body-sm text-[12px] text-error font-semibold mt-1 flex items-center gap-1; }
+.error-campo { @apply font-body-sm text-[0.8125rem] text-error font-semibold mt-1 flex items-center gap-1; }
 
 @media print {
   header, footer, .no-print { display: none !important; }
