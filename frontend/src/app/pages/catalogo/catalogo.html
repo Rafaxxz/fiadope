@@ -1,0 +1,239 @@
+<div class="flex flex-col w-full">
+  <section class="w-full bg-surface-container-low px-gutter md:px-gutter-desktop py-space-lg">
+    <div class="max-w-[88rem] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+      <div class="flex flex-col gap-1">
+        <div class="flex items-center gap-space-xs flex-wrap">
+          <span class="inline-flex items-center gap-1 font-label-badge text-label-badge uppercase tracking-wider bg-tertiary-fixed text-on-tertiary-fixed px-space-sm py-1 rounded-full shadow-sm"><span class="material-symbols-outlined text-[0.9375rem]">storefront</span> Mostrador Principal</span>
+          <span class="inline-flex items-center gap-1 font-label-badge text-label-badge uppercase tracking-wider bg-secondary-fixed text-on-secondary-fixed-variant px-space-sm py-1 rounded-full"><span class="material-symbols-outlined text-[0.9375rem]">local_fire_department</span> {{ activos().length }} productos activos</span>
+        </div>
+        <h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface uppercase tracking-tight">Catálogo de Productos <span class="text-primary-container">&amp; Fiados</span></h1>
+        <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Precios transparentes al contado y al fiado. Configura en un toque qué se puede fiar a fin de mes o en cuotas.</p>
+      </div>
+      <div class="flex items-center gap-space-sm shrink-0 self-stretch md:self-auto justify-end">
+        <button class="w-full md:w-auto inline-flex items-center justify-center gap-space-xs bg-surface-container-lowest text-on-surface font-label-lg text-label-lg px-space-md py-3 rounded-lg shadow-sm hover:bg-surface-container transition-all" type="button" (click)="ayuda.set(true)">
+          <span class="material-symbols-outlined text-primary text-[1.25rem]">info</span><span>¿Cómo funciona el catálogo?</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filtros -->
+  <section class="w-full bg-surface-container-lowest shadow-sm sticky top-[5.875rem] z-40">
+    <div class="max-w-[88rem] mx-auto px-gutter md:px-gutter-desktop py-space-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-sm">
+      <div class="flex items-center gap-space-xs overflow-x-auto pb-1 lg:pb-0 scroll-fino">
+        <button type="button" class="font-label-md text-label-md px-space-md py-2 rounded-full whitespace-nowrap transition-colors"
+                [class]="categoria() === '' ? 'bg-primary-container text-on-primary-container shadow-sm' : 'bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high'"
+                (click)="categoria.set('')">Todos ({{ activos().length }})</button>
+        @for (c of categorias; track c.valor) {
+          <button type="button" class="font-label-md text-label-md px-space-md py-2 rounded-full whitespace-nowrap transition-colors"
+                  [class]="categoria() === c.valor ? 'bg-primary-container text-on-primary-container shadow-sm' : 'bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high'"
+                  (click)="categoria.set(c.valor)">{{ c.emoji }} {{ c.valor }} ({{ cuenta(c.valor) }})</button>
+        }
+        <button type="button" class="font-label-md text-label-md px-space-md py-2 rounded-full whitespace-nowrap transition-colors flex items-center gap-1"
+                [class]="verBajas() ? 'bg-error text-on-error' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'" (click)="verBajas.set(!verBajas())">
+          <span class="material-symbols-outlined text-[1rem]">inventory</span>{{ verBajas() ? 'Viendo dados de baja' : 'Ver dados de baja' }}
+        </button>
+      </div>
+      <div class="relative w-full lg:w-80 shrink-0">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[1.25rem]">search</span>
+        <input class="w-full pl-10 pr-space-md py-2.5 rounded-lg bg-surface-container font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all"
+               placeholder="Buscar arroz, aceite, leche o SKU..." type="text" [ngModel]="q()" (ngModelChange)="q.set($event)" />
+      </div>
+    </div>
+  </section>
+
+  <section class="w-full max-w-[88rem] mx-auto px-gutter md:px-gutter-desktop py-space-xl">
+    <div class="mb-space-lg p-space-md rounded-xl bg-tertiary-fixed/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm">
+      <div class="flex items-center gap-space-sm">
+        <span class="material-symbols-outlined text-tertiary text-[1.625rem]">calculate</span>
+        <div>
+          <h2 class="font-headline-sm text-headline-sm text-on-surface">Regla de precio protegido del barrio</h2>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">El precio de lista (fiado) nunca es menor al contado. Diferencia promedio en tu catálogo: +{{ margenPromedio().toFixed(1) }}% · {{ enCuotas() }} productos se pueden fiar en cuotas.</p>
+        </div>
+      </div>
+      <span class="font-label-badge text-label-badge uppercase px-space-sm py-1 bg-surface-container-lowest text-secondary rounded-full shadow-sm self-end sm:self-auto sm:whitespace-nowrap">Margen seguro para {{ auth.perfil()?.tienda?.razonSocial }}</span>
+    </div>
+
+    <div class="fp-escalonado grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
+      @for (p of filtrados(); track p.id) {
+        <article class="tarjeta-producto flex flex-col bg-surface-container-lowest rounded-xl p-space-md relative transition-all duration-200 hover:-translate-y-0.5"
+                 [class]="p.permiteCuotas && !p.permiteFinMes ? 'shadow-md ring-2 ring-primary-container/20' : 'shadow-sm hover:shadow-md'" [class.opacity-70]="p.estado === 'BAJA'">
+          <div class="relative w-full h-44 rounded-lg overflow-hidden bg-surface-container-low mb-space-md">
+            <fp-producto-img class="w-full h-full" [url]="p.imagenUrl" [categoria]="p.categoria" [alt]="p.nombre" [tamano]="64" />
+            <div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+              @if (p.permiteFinMes) { <span class="font-label-badge text-label-badge uppercase tracking-wider bg-tertiary-fixed text-on-tertiary-fixed px-space-xs py-1 rounded shadow-sm -rotate-2">Fin de Mes</span> }
+              @if (p.permiteCuotas) { <span class="font-label-badge text-label-badge uppercase tracking-wider bg-primary-container text-on-primary-container px-space-xs py-1 rounded shadow-sm rotate-1">Cuotas</span> }
+              @if (p.estado === 'BAJA') { <span class="font-label-badge text-label-badge uppercase tracking-wider bg-error text-on-error px-space-xs py-1 rounded shadow-sm">Dado de baja</span> }
+            </div>
+            <span class="absolute bottom-2 right-2 font-label-badge text-label-badge bg-surface-container-lowest/90 px-space-xs py-0.5 rounded text-on-surface-variant">SKU: {{ p.sku }}</span>
+          </div>
+          <div class="flex flex-col flex-1">
+            <div class="flex items-start justify-between gap-space-xs">
+              <div>
+                <span class="font-label-md text-label-md text-primary uppercase">{{ emoji(p.categoria) }} {{ p.categoria }}</span>
+                <h3 class="font-headline-md text-headline-md text-on-surface">{{ p.nombre }}</h3>
+                @if (p.marca) { <span class="font-body-sm text-body-sm text-on-surface-variant">{{ p.marca }} · {{ p.unidad }}</span> }
+              </div>
+              <div class="flex items-center">
+                <button type="button" class="p-1 text-on-surface-variant hover:text-primary" title="Editar producto" (click)="editar(p)"><span class="material-symbols-outlined text-[1.25rem]">edit</span></button>
+                <button type="button" class="p-1 hover:text-error" [class]="p.estado === 'ACTIVO' ? 'text-on-surface-variant' : 'text-secondary'" [title]="p.estado === 'ACTIVO' ? 'Dar de baja' : 'Reactivar'" (click)="cambiarEstado(p)">
+                  <span class="material-symbols-outlined text-[1.25rem]">{{ p.estado === 'ACTIVO' ? 'delete' : 'restart_alt' }}</span>
+                </button>
+              </div>
+            </div>
+            <div class="mt-space-md grid grid-cols-2 gap-space-xs p-space-sm rounded-lg bg-surface-container-low">
+              <div class="flex flex-col">
+                <span class="font-label-md text-label-md text-on-surface-variant">Al Contado</span>
+                <span class="font-currency-md text-currency-md text-on-surface">S/ {{ p.precioContado | soles }}</span>
+                <span class="font-body-sm text-[0.8125rem] text-on-surface-variant">Efectivo / Yape hoy</span>
+              </div>
+              <div class="flex flex-col pl-space-sm">
+                <span class="font-label-md text-label-md text-secondary">Precio de Lista (Fiado)</span>
+                <span class="font-currency-md text-currency-md text-secondary-container">S/ {{ p.precioLista | soles }}</span>
+                <span class="font-body-sm text-[0.8125rem] text-secondary">Margen: +S/ {{ margen(p) | soles }}</span>
+              </div>
+            </div>
+            @if (p.estado === 'ACTIVO') {
+              <div class="mt-space-md pt-space-xs flex items-center gap-space-xs mt-auto">
+                @if (p.permiteFinMes) {
+                  <a [routerLink]="['/nueva-compra']" [queryParams]="{ producto: p.id, modalidad: 'FIN_DE_MES' }" class="flex-1 inline-flex items-center justify-center gap-1.5 h-12 rounded-lg bg-primary-container hover:opacity-95 text-on-primary-container font-headline-sm text-headline-sm transition-transform active:scale-[0.98] shadow-sm">
+                    <span class="material-symbols-outlined text-[1.125rem]">add_shopping_cart</span><span>+ Fiado Rápido</span>
+                  </a>
+                }
+                @if (p.permiteCuotas) {
+                  <a [routerLink]="['/nueva-compra']" [queryParams]="{ producto: p.id, modalidad: 'CUOTAS' }" class="flex-1 inline-flex items-center justify-center gap-1.5 h-12 rounded-lg bg-secondary-container hover:opacity-95 text-on-secondary font-headline-sm text-headline-sm transition-transform active:scale-[0.98] shadow-sm">
+                    <span class="material-symbols-outlined text-[1.125rem]">event_repeat</span><span>{{ p.permiteFinMes ? 'Cuotas' : '+ Armar Fiado en Cuotas' }}</span>
+                  </a>
+                }
+              </div>
+            }
+          </div>
+        </article>
+      } @empty {
+        @if (cargando()) {
+          @for (i of [0, 1, 2]; track i) { <fp-esqueleto tipo="tarjetas" [n]="1" [imagen]="true" columnas="grid-cols-1" /> }
+        } @else {
+        <div class="col-span-full p-space-xl rounded-xl bg-surface-container-lowest text-center text-on-surface-variant">
+          <span class="material-symbols-outlined text-[2.5rem] text-outline">inventory_2</span>
+          <p class="font-body-md text-body-md mt-2">{{ verBajas() ? 'No tienes productos dados de baja.' : 'No hay productos que coincidan.' }}</p>
+        </div>
+        }
+      }
+    </div>
+  </section>
+
+  <section class="w-full bg-surface-container-lowest shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-space-md">
+    <div class="max-w-[88rem] mx-auto px-gutter md:px-gutter-desktop flex flex-col xl:flex-row items-center justify-between gap-space-md">
+      <div class="flex items-center gap-space-md overflow-x-auto w-full xl:w-auto pb-1 xl:pb-0">
+        <div class="flex items-center gap-space-xs shrink-0">
+          <div class="w-9 h-9 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed"><span class="material-symbols-outlined text-[1.25rem]">trending_up</span></div>
+          <div class="flex flex-col">
+            <span class="font-label-md text-label-md text-on-surface-variant uppercase">Catálogo activo</span>
+            <span class="font-headline-sm text-headline-sm text-on-surface">{{ activos().length }} productos • {{ enCuotas() }} en cuotas</span>
+          </div>
+        </div>
+        <div class="h-8 w-px bg-surface-container-high hidden sm:block"></div>
+        <div class="flex items-center gap-space-xs shrink-0">
+          <div class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed-variant"><span class="material-symbols-outlined text-[1.25rem]">account_balance_wallet</span></div>
+          <div class="flex flex-col">
+            <span class="font-label-md text-label-md text-on-surface-variant uppercase">Margen fiado promedio</span>
+            <span class="font-headline-sm text-headline-sm text-secondary">+{{ margenPromedio().toFixed(1) }}% sobre el contado</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col sm:flex-row items-center gap-space-sm w-full xl:w-auto justify-end">
+        <div class="flex-col text-right hidden 2xl:flex">
+          <span class="font-body-sm text-body-sm text-on-surface-variant">¿Llegó un producto nuevo al almacén?</span>
+          <span class="font-label-md text-label-md text-primary font-bold">Actualiza tu lista en 2 pasos</span>
+        </div>
+        <button class="w-full sm:w-auto whitespace-nowrap inline-flex items-center justify-center gap-space-xs px-space-md py-3 rounded-lg bg-surface-container-high hover:bg-surface-dim text-on-surface font-headline-sm text-headline-sm transition-colors shadow-sm" type="button" (click)="nuevo()">
+          <span class="material-symbols-outlined text-[1.25rem]">add_box</span><span>+ Agregar Producto</span>
+        </button>
+        <a routerLink="/nueva-compra" class="w-full sm:w-auto whitespace-nowrap inline-flex items-center justify-center gap-space-xs px-space-lg py-3 rounded-lg bg-primary-container text-on-primary-container font-headline-sm text-headline-sm shadow-md hover:opacity-95 transition-transform active:scale-95">
+          <span class="material-symbols-outlined text-[1.25rem]">receipt_long</span><span>Abrir Libreta de Fiado</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</div>
+
+@if (modal()) {
+  <div class="fixed inset-0 z-[60] bg-on-surface/50 backdrop-blur-sm flex items-center justify-center p-gutter" (click)="modal.set(false)">
+    <div class="bg-surface-container-lowest rounded-xl max-w-xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh]" (click)="$event.stopPropagation()">
+      <div class="h-2 w-full chicha-gradient"></div>
+      <form class="p-space-lg flex flex-col gap-space-md overflow-y-auto" (focusout)="vivo.tocar($event)" (input)="vivo.revisar($event)" (change)="vivo.revisar($event)" (ngSubmit)="guardar()" novalidate>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-space-xs">
+            <span class="material-symbols-outlined text-primary text-[1.75rem]">add_box</span>
+            <h3 class="font-headline-lg text-headline-lg text-on-surface">{{ editando() ? 'Editar producto' : 'Agregar producto' }}</h3>
+          </div>
+          <button class="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant" type="button" (click)="modal.set(false)"><span class="material-symbols-outlined text-[1.25rem]">close</span></button>
+        </div>
+        @if (errorForm()) { <p class="p-2 rounded-lg bg-error-container text-on-error-container font-body-sm text-body-sm font-semibold">{{ errorForm() }}</p> }
+        <div class="flex gap-space-md items-start">
+          <label class="w-28 h-28 shrink-0 rounded-lg overflow-hidden bg-surface-container-low cursor-pointer relative group" title="Subir foto (JPG o PNG, máx. 2 MB)">
+            <fp-producto-img class="w-full h-full" [url]="form.imagenUrl" [categoria]="form.categoria" [tamano]="40" />
+            <span class="absolute inset-0 bg-inverse-surface/50 text-inverse-on-surface opacity-0 group-hover:opacity-100 flex items-center justify-center font-label-md text-label-md">{{ subiendo() ? 'Subiendo…' : 'Cambiar foto' }}</span>
+            <input type="file" accept="image/png,image/jpeg" class="hidden" (change)="elegirImagen($event)" />
+          </label>
+          <div class="flex-1 flex flex-col gap-1">
+            <label class="etiqueta">Nombre del producto o servicio <fp-info titulo="Nombre" texto="Cómo lo reconocen tus vecinos. Ej.: Arroz Costeño x kilo." /></label>
+            <input class="campo" [class.invalido]="errores()['nombre']" name="nombre" [(ngModel)]="form.nombre" maxlength="100" placeholder="Ej. Arroz Costeño x kilo" />
+            @if (errores()['nombre']) { <p class="error-campo">{{ errores()['nombre'] }}</p> }
+            @if (errores()['imagen']) { <p class="error-campo">{{ errores()['imagen'] }}</p> }
+            <p class="font-body-sm text-[0.84375rem] text-on-surface-variant">Foto opcional: JPG o PNG de hasta 2 MB.</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-space-sm">
+          <div class="flex flex-col gap-1">
+            <label class="etiqueta">Categoría</label>
+            <select class="campo" name="categoria" [(ngModel)]="form.categoria">@for (c of categorias; track c.valor) { <option [value]="c.valor">{{ c.emoji }} {{ c.valor }}</option> }</select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="etiqueta">SKU <fp-info titulo="SKU" texto="Código interno de 1 a 15 caracteres, único en tu tienda. Ej.: ABR-002." /></label>
+            <input class="campo font-mono uppercase" [class.invalido]="errores()['sku']" name="sku" [(ngModel)]="form.sku" maxlength="15" placeholder="ABR-002" />
+            @if (errores()['sku']) { <p class="error-campo">{{ errores()['sku'] }}</p> }
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="etiqueta">Marca</label>
+            <input class="campo" name="marca" [(ngModel)]="form.marca" maxlength="60" placeholder="Opcional" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="etiqueta">Unidad</label>
+            <select class="campo" name="unidad" [(ngModel)]="form.unidad">
+              @for (u of ['UND', 'KG', 'LT', 'PAQ', 'CAJA', 'SERV']; track u) { <option [value]="u">{{ u }}</option> }
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="etiqueta">Precio contado (S/)</label>
+            <input class="campo font-mono" [class.invalido]="errores()['precioContado']" type="number" step="0.01" min="0.01" name="precioContado" [(ngModel)]="form.precioContado" placeholder="10.00" />
+            @if (errores()['precioContado']) { <p class="error-campo">{{ errores()['precioContado'] }}</p> }
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="etiqueta">Precio de lista (fiado) <fp-info titulo="Precio de lista (fiado)" texto="Es el precio que se cobra al crédito; no puede ser menor al precio al contado." /></label>
+            <input class="campo font-mono" [class.invalido]="errores()['precioLista']" type="number" step="0.01" min="0.01" name="precioLista" [(ngModel)]="form.precioLista" placeholder="10.50" />
+            @if (errores()['precioLista']) { <p class="error-campo">{{ errores()['precioLista'] }}</p> }
+          </div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="etiqueta">Modalidades de fiado <fp-info titulo="Modalidades" texto="Indica si el producto se puede fiar a fin de mes, en cuotas o de ambas formas." /></span>
+          <div class="grid grid-cols-2 gap-space-sm">
+            <label class="flex items-center gap-2 p-3 rounded-lg cursor-pointer" [class]="form.permiteFinMes ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-surface-container'">
+              <input type="checkbox" class="accent-primary w-4 h-4" name="finmes" [(ngModel)]="form.permiteFinMes" /><span class="font-label-lg text-label-lg">FIN DE MES</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-lg cursor-pointer" [class]="form.permiteCuotas ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container'">
+              <input type="checkbox" class="accent-primary w-4 h-4" name="cuotas" [(ngModel)]="form.permiteCuotas" /><span class="font-label-lg text-label-lg">CUOTAS</span>
+            </label>
+          </div>
+          @if (errores()['modalidades']) { <p class="error-campo">{{ errores()['modalidades'] }}</p> }
+        </div>
+        <button class="w-full py-3.5 rounded-lg bg-primary-container text-on-primary-container font-headline-sm text-headline-sm shadow-md hover:opacity-95 disabled:opacity-60" type="submit" [disabled]="guardando() || subiendo()">
+          {{ guardando() ? 'Guardando…' : (editando() ? 'Guardar cambios' : 'Agregar al catálogo') }}
+        </button>
+      </form>
+    </div>
+  </div>
+}
+@if (ayuda()) {
+  <fp-ayuda [titulo]="ayudaCatalogo.titulo" [pasos]="ayudaCatalogo.pasos" boton="¡Entendido, volver al catálogo!" (cerrar)="ayuda.set(false)" />
+}

@@ -10,9 +10,21 @@ Proyecto del curso **Finanzas e Ingeniería Económica (1ASI0642) – UPC**, Gru
 |------|------------|---------|------|
 | API REST + motor financiero | Java 17, Spring Boot 3.5, Spring Security (JWT + MFA), JPA, Flyway | `backend/` | `main` |
 | Base de datos | PostgreSQL 16+ | `backend/src/main/resources/db/migration` | `main` |
-| Frontend | Angular + Tailwind (mismo diseño de los mockups) | `frontend/` | `frontend` |
+| Frontend | Angular 20 + Tailwind (mismo diseño y colores de los mockups P01-P12) | `frontend/` | `frontend` |
 
-El despliegue está en [`DEPLOY.md`](DEPLOY.md).
+El despliegue está en [`DEPLOY.md`](DEPLOY.md) (Docker Compose o Neon + Render + Vercel).
+
+Para levantar todo con Docker: `cp .env.example .env`, completa los valores y `docker compose up -d --build`.
+
+## Frontend
+
+```bash
+cd frontend
+npm install
+npx ng serve      # http://localhost:4200, usa la API de http://localhost:8080
+```
+
+Las 12 pantallas, sus rutas y roles están en [`frontend/README.md`](frontend/README.md).
 
 ---
 

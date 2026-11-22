@@ -1,0 +1,49 @@
+# Levanta FiadoPe completo: PostgreSQL + API + web.  docker compose up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: fiadope
+      POSTGRES_USER: fiadope
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cambia-esta-clave}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fiadope -d fiadope"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/fiadope
+      DB_USER: fiadope
+      DB_PASSWORD: ${DB_PASSWORD:-cambia-esta-clave}
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en el archivo .env}
+      MFA_DEV_ECHO: ${MFA_DEV_ECHO:-false}
+      SEED_ENABLED: ${SEED_ENABLED:-true}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-no-reply@fiadope.pe}
+    volumes:
+      - uploads:/app/uploads
+
+  web:
+    build: ./frontend
+    depends_on:
+      - api
+    environment:
+      BACKEND_URL: http://api:8080
+    ports:
+      - "${WEB_PORT:-80}:80"
+
+volumes:
+  pgdata:
+  uploads:
+

@@ -1,0 +1,37 @@
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options DENY always;
+    add_header Referrer-Policy same-origin always;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+
+    # API y fotos de productos -> backend Spring Boot
+    location /api/ {
+        proxy_pass ${BACKEND_URL};
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 3m;
+    }
+    location /uploads/ {
+        proxy_pass ${BACKEND_URL};
+    }
+
+    # Archivos con hash: caché larga
+    location ~* \.(?:js|css|woff2?|png|jpg|jpeg|svg|ico)$ {
+        expires 30d;
+        try_files $uri =404;
+    }
+
+    # SPA: cualquier otra ruta va a index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+
