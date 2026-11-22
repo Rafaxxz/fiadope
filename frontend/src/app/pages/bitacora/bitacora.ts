@@ -41,10 +41,11 @@ const NOMBRES: Record<string, { texto: string; color: string }> = {
 const ALERTAS = ['LOGIN_FALLIDO', 'LOGIN_RECHAZADO', 'BLOQUEO_CUENTA', 'MFA_FALLIDO', 'ACCESO_DENEGADO'];
 
 /** P12 – Bitácora (HU12): solo lectura, con filtros. */
+import { Esqueleto } from '../../shared/esqueleto';
 @Component({
   selector: 'fp-bitacora',
   standalone: true,
-  imports: [FormsModule, FechaPipe, InfoTip, AyudaModal],
+  imports: [FormsModule, FechaPipe, InfoTip, AyudaModal, Esqueleto],
   templateUrl: './bitacora.html',
 })
 export class BitacoraPage implements OnInit {

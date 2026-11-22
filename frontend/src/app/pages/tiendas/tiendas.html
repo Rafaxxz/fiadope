@@ -124,7 +124,7 @@
           </thead>
           <tbody class="fp-escalonado font-body-md text-body-md">
             @if (cargando()) {
-              <tr><td colspan="8" class="py-10 text-center text-on-surface-variant">Cargando tiendas…</td></tr>
+              <tr><td colspan="8" class="px-4 py-space-sm"><fp-esqueleto tipo="fila" [n]="3" /></td></tr>
             }
             @for (t of visibles(); track t.id; let par = $even) {
               <tr class="transition-colors" [class]="par ? 'bg-surface-container-lowest hover:bg-surface-container-low' : 'bg-surface-container-low hover:bg-surface-container'" [class.opacity-90]="t.estado === 'BAJA'">
@@ -241,7 +241,7 @@
         </div>
         <button class="p-1 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface" type="button" (click)="modal.set(null)"><span class="material-symbols-outlined text-[1.5rem]">close</span></button>
       </div>
-      <form class="p-space-lg flex flex-col gap-space-md overflow-y-auto" (ngSubmit)="guardar()" novalidate>
+      <form class="p-space-lg flex flex-col gap-space-md overflow-y-auto" (focusout)="vivo.tocar($event)" (input)="vivo.revisar($event)" (change)="vivo.revisar($event)" (ngSubmit)="guardar()" novalidate>
         @if (errorForm()) { <p class="p-2 rounded-lg bg-error-container text-on-error-container font-body-sm text-body-sm font-semibold">{{ errorForm() }}</p> }
         <div class="flex flex-col gap-1">
           <label class="font-label-md text-label-md text-on-surface font-bold flex items-center">RUC de la tienda (11 dígitos): <fp-info titulo="RUC" texto="11 dígitos; empieza con 10 (persona natural) o 20 (empresa). Ej.: 10458792011." /></label>

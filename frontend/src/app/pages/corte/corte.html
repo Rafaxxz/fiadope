@@ -82,7 +82,7 @@
           </tr>
         </thead>
         <tbody class="fp-escalonado divide-y divide-surface-container">
-          @if (cargando()) { <tr><td colspan="7" class="py-10 text-center text-on-surface-variant">Calculando el corte…</td></tr> }
+          @if (cargando()) { <tr><td colspan="7" class="px-4 py-space-sm"><fp-esqueleto tipo="fila" [n]="3" /></td></tr> }
           @for (c of filas(); track c.idCliente; let i = $index) {
             @let e = estado(c);
             <tr class="hover:bg-surface-container-low transition-colors">

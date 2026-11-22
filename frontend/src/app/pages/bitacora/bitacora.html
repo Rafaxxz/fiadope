@@ -90,7 +90,7 @@
           </tr>
         </thead>
         <tbody class="fp-escalonado font-body-sm text-body-sm text-on-surface">
-          @if (cargando()) { <tr><td colspan="7" class="py-10 text-center text-on-surface-variant">Consultando la bitácora…</td></tr> }
+          @if (cargando()) { <tr><td colspan="7" class="px-4 py-space-sm"><fp-esqueleto tipo="lista" [n]="6" /></td></tr> }
           @for (r of p?.contenido ?? []; track r.id; let impar = $odd) {
             @let antes = campos(r.valorAntes);
             @let despues = campos(r.valorDespues);

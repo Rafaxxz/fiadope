@@ -21,6 +21,11 @@
   </div>
 
   <div class="max-w-[88rem] mx-auto w-full px-gutter lg:px-gutter-desktop py-space-xl flex flex-col gap-space-xl">
+    @if (!p) {
+      <fp-esqueleto tipo="tarjetas" [n]="3" />
+      <fp-esqueleto tipo="bloque" alto="5rem" />
+      <div class="bg-surface-container-lowest rounded-xl shadow-md px-space-md py-space-sm"><fp-esqueleto tipo="fila" [n]="4" /></div>
+    } @else {
     <!-- 3 tarjetas resumen -->
     <div class="fp-escalonado grid grid-cols-1 md:grid-cols-3 gap-space-lg">
       <div class="relative bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col justify-between overflow-hidden">
@@ -33,11 +38,11 @@
         </div>
         <div class="flex items-baseline gap-1 my-1">
           <span class="font-currency-display text-headline-sm text-primary font-bold">S/</span>
-          <span class="font-currency-display text-display-lg-mobile md:text-display-lg text-on-surface tabular-nums tracking-tight">{{ p?.totalPorCobrar | soles }}</span>
+          <span class="font-currency-display text-display-lg-mobile md:text-display-lg text-on-surface tabular-nums tracking-tight"><fp-contador [valor]="p?.totalPorCobrar" /></span>
         </div>
         <p class="font-body-sm text-body-sm text-on-surface-variant mt-1 flex items-center gap-1.5">
           <span class="inline-block w-2.5 h-2.5 rounded-full bg-secondary-container"></span>
-          <strong>{{ p?.clientesConSaldo ?? 0 }} vecinos</strong> con saldo pendiente activo
+          <strong>{{ p?.clientesConSaldo ?? 0 }} {{ p?.clientesConSaldo === 1 ? 'vecino' : 'vecinos' }}</strong> con saldo pendiente activo
         </p>
         <div class="mt-space-md pt-space-sm bg-surface-container-low px-space-sm py-2 rounded-lg flex items-center justify-between text-on-surface">
           <span class="font-body-sm text-body-sm">Límite global del negocio:</span>
@@ -55,7 +60,7 @@
         </div>
         <div class="flex items-baseline gap-1 my-1">
           <span class="font-currency-display text-headline-sm text-secondary font-bold">S/</span>
-          <span class="font-currency-display text-display-lg-mobile md:text-display-lg text-on-surface tabular-nums tracking-tight">{{ p?.montoProximoCorte | soles }}</span>
+          <span class="font-currency-display text-display-lg-mobile md:text-display-lg text-on-surface tabular-nums tracking-tight"><fp-contador [valor]="p?.montoProximoCorte" /></span>
         </div>
         <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
           Corte en <strong>{{ p?.diasParaCorte ?? 0 }} {{ p?.diasParaCorte === 1 ? 'día' : 'días' }}</strong> (Pago límite: {{ p?.proximoPago | fecha: true }})
@@ -80,9 +85,9 @@
         </div>
         <div class="flex items-baseline gap-1 my-1">
           <span class="font-currency-display text-headline-sm text-error font-bold">S/</span>
-          <span class="font-currency-display text-display-lg-mobile md:text-display-lg text-error tabular-nums tracking-tight">{{ p?.montoEnMora | soles }}</span>
+          <span class="font-currency-display text-display-lg-mobile md:text-display-lg text-error tabular-nums tracking-tight"><fp-contador [valor]="p?.montoEnMora" /></span>
         </div>
-        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1"><strong>{{ p?.clientesEnMora ?? 0 }} vecinos atrasados</strong> con recargo diario activo</p>
+        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1"><strong>{{ p?.clientesEnMora ?? 0 }} {{ p?.clientesEnMora === 1 ? 'vecino atrasado' : 'vecinos atrasados' }}</strong> con recargo diario activo</p>
         <div class="mt-space-md pt-space-sm bg-error-container/40 px-space-sm py-2 rounded-lg flex items-center justify-between">
           <span class="font-body-sm text-body-sm text-on-error-container">TEA moratoria pactada:</span>
           <span class="font-label-md text-label-md text-error font-bold">{{ p?.teaMoraBasePorcentaje?.toFixed(4) }} %</span>
@@ -118,7 +123,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">Vecinos y Cuentas Corrientes</h2>
-            <span class="font-label-badge text-label-badge bg-surface-container-high px-2 py-0.5 rounded-full text-on-surface">{{ p?.totalClientes ?? 0 }} Registrados</span>
+            <span class="font-label-badge text-label-badge bg-surface-container-high px-2 py-0.5 rounded-full text-on-surface">{{ p?.totalClientes ?? 0 }} {{ p?.totalClientes === 1 ? 'Registrado' : 'Registrados' }}</span>
           </div>
           <p class="font-body-sm text-body-sm text-on-surface-variant">Control exacto del saldo al corte, moras y créditos del barrio</p>
         </div>
@@ -136,6 +141,51 @@
       </div>
       <fp-tabla-clientes [clientes]="clientes()" [tienda]="p?.tienda ?? ''" [porPagina]="6"
         [pie]="'TEA compensatoria promedio ' + (p?.teaBasePorcentaje?.toFixed(4) ?? '') + ' % | TEA moratoria promedio ' + (p?.teaMoraBasePorcentaje?.toFixed(4) ?? '') + ' %'" />
+    </div>
+
+    <!-- Salud de la libreta (gráficos) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+      <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col sm:flex-row items-center gap-space-lg">
+        <div class="relative w-40 h-40 shrink-0" role="img" [attr.aria-label]="'Uso del límite global: ' + usoLimite().toFixed(1) + ' por ciento'">
+          <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90">
+            <circle cx="60" cy="60" r="50" fill="none" stroke-width="14" class="stroke-surface-container"></circle>
+            <circle cx="60" cy="60" r="50" fill="none" stroke-width="14" stroke-linecap="round" class="fp-anillo stroke-primary-container"
+                    [attr.stroke-dasharray]="314.16" [attr.stroke-dashoffset]="314.16 * (1 - usoLimite() / 100)"></circle>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="font-currency-display text-headline-md text-on-surface"><fp-contador [valor]="usoLimite()" [decimales]="1" />%</span>
+            <span class="font-label-badge text-label-badge text-on-surface-variant uppercase">del límite</span>
+          </div>
+        </div>
+        <div class="flex-1 w-full">
+          <span class="font-label-badge text-label-badge text-primary uppercase">Salud de la libreta</span>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">Uso del límite global</h3>
+          <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Por cobrar S/ {{ p.totalPorCobrar | soles }} de un límite de S/ {{ p.limiteGlobal | soles }}.
+            {{ usoLimite() < 70 ? 'Nivel seguro: queda margen para fiar.' : 'Atención: el negocio ya usa gran parte de su límite.' }}</p>
+          <div class="mt-space-sm flex items-center gap-2 font-label-md text-label-md">
+            <span class="w-3 h-3 rounded-full bg-primary-container"></span>Usado
+            <span class="w-3 h-3 rounded-full bg-surface-container ml-3"></span>Disponible: S/ {{ (p.limiteGlobal - p.totalPorCobrar) | soles }}
+          </div>
+        </div>
+      </div>
+      <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col justify-center gap-space-sm">
+        <span class="font-label-badge text-label-badge text-secondary uppercase">Composición de lo que te deben</span>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface">¿Cuánto está al día y cuánto en mora?</h3>
+        <div class="h-6 w-full rounded-full overflow-hidden flex bg-surface-container" role="img" [attr.aria-label]="'Al día ' + (100 - pctMora()).toFixed(0) + ' por ciento, en mora ' + pctMora().toFixed(0) + ' por ciento'">
+          <div class="fp-barra h-full bg-[#00C853]" [style.width.%]="100 - pctMora()"></div>
+          <div class="fp-barra h-full bg-error" [style.width.%]="pctMora()" style="animation-delay: 250ms"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-space-sm">
+          <div class="p-space-sm rounded-lg bg-surface-container-low">
+            <div class="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant"><span class="w-3 h-3 rounded-full bg-[#00C853]"></span>Al día / por vencer</div>
+            <div class="font-currency-md text-currency-md text-on-surface">S/ <fp-contador [valor]="p.totalPorCobrar - p.montoEnMora" /></div>
+          </div>
+          <div class="p-space-sm rounded-lg bg-surface-container-low">
+            <div class="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant"><span class="w-3 h-3 rounded-full bg-error"></span>En mora</div>
+            <div class="font-currency-md text-currency-md text-error">S/ <fp-contador [valor]="p.montoEnMora" /></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Tarjetas informativas -->
@@ -168,9 +218,15 @@
             <span class="material-symbols-outlined text-tertiary">inventory_2</span>
           </div>
           <h3 class="font-headline-sm text-headline-sm text-on-surface">Lo que más se fía en el mes</h3>
-          <ul class="mt-space-sm flex flex-col gap-2 font-body-sm text-body-sm text-on-surface">
-            @for (t of p?.topProductos ?? []; track t.nombre) {
-              <li class="flex items-center justify-between py-1 bg-surface-container-low px-space-sm rounded"><span>{{ t.nombre }}</span><strong>S/ {{ t.monto | soles }}</strong></li>
+          <ul class="mt-space-sm flex flex-col gap-3 font-body-sm text-body-sm text-on-surface">
+            @for (t of p.topProductos; track t.nombre; let i = $index) {
+              <li class="flex flex-col gap-1">
+                <div class="flex items-center justify-between gap-2"><span class="truncate">{{ t.nombre }}</span><strong class="tabular-nums shrink-0">S/ {{ t.monto | soles }}</strong></div>
+                <div class="h-2.5 rounded-full bg-surface-container overflow-hidden">
+                  <div class="fp-barra h-full rounded-full" [class]="i === 0 ? 'bg-primary-container' : i === 1 ? 'bg-secondary-container' : 'bg-tertiary-container'"
+                       [style.width.%]="maxTop() ? (t.monto / maxTop()) * 100 : 0" [style.animation-delay.ms]="200 + i * 120"></div>
+                </div>
+              </li>
             } @empty {
               <li class="py-1 px-space-sm text-on-surface-variant">Sin fiados en los últimos 30 días.</li>
             }
@@ -194,6 +250,7 @@
         </div>
       </div>
     </div>
+    }
   </div>
 </div>
 @if (ayuda()) {

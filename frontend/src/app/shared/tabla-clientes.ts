@@ -2,15 +2,66 @@ import { Component, computed, input, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ClienteResumen } from '../core/models';
 import { FechaPipe, InicialesPipe, SolesPipe } from './formato';
+import { Esqueleto } from './esqueleto';
 
 /** Tabla «Vecinos y cuentas corrientes» del panel (P04), reutilizada en Clientes. */
 @Component({
   selector: 'fp-tabla-clientes',
   standalone: true,
-  imports: [RouterLink, SolesPipe, FechaPipe, InicialesPipe],
+  imports: [RouterLink, SolesPipe, FechaPipe, InicialesPipe, Esqueleto],
   template: `
     <div class="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden">
-      <div class="overflow-x-auto scroll-fino">
+      <!-- Celular: cada vecino como tarjeta -->
+      <div class="md:hidden fp-escalonado divide-y divide-surface-container">
+        @if (cargando()) { <div class="px-space-md py-space-sm"><fp-esqueleto tipo="fila" [n]="4" /></div> }
+        @for (c of visibles(); track c.id) {
+          <div class="p-space-md flex flex-col gap-space-sm" [class.bg-error-container/10]="c.enMora">
+            <div class="flex items-center gap-space-sm">
+              <div class="w-11 h-11 rounded-full flex items-center justify-center font-headline-sm text-headline-sm shrink-0"
+                   [class]="c.enMora ? 'bg-error-container text-error' : 'bg-primary-fixed text-on-primary-fixed'">{{ c.nombres | iniciales }}</div>
+              <div class="flex-1 min-w-0">
+                <a [routerLink]="['/clientes', c.id]" class="block font-headline-sm text-headline-sm text-on-surface truncate">{{ c.nombres }}</a>
+                <span class="block font-body-sm text-body-sm text-on-surface-variant truncate">DNI {{ c.dni }} • {{ c.direccion }}</span>
+              </div>
+              @if (c.enMora) {
+                <span class="shrink-0 inline-flex items-center gap-1 bg-error text-on-error px-2.5 py-1 rounded-full font-label-badge text-label-badge uppercase"><span class="material-symbols-outlined text-[0.9375rem]">timer</span>{{ c.diasMora }} d</span>
+              } @else if (c.idEstadoPendiente) {
+                <span class="shrink-0 bg-tertiary-fixed text-on-tertiary-fixed px-2.5 py-1 rounded-full font-label-badge text-label-badge uppercase">Por pagar</span>
+              } @else {
+                <span class="shrink-0 bg-[#00C853] text-[#111111] px-2.5 py-1 rounded-full font-label-badge text-label-badge uppercase">Al día</span>
+              }
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="p-2.5 rounded-lg bg-surface-container-low">
+                <span class="block font-label-badge text-label-badge text-on-surface-variant uppercase">Saldo al corte</span>
+                <span class="font-currency-md text-currency-md tabular-nums" [class]="c.enMora ? 'text-error' : 'text-on-surface'">S/ {{ c.saldoAlCorte | soles }}</span>
+                @if (c.enMora) { <span class="block text-[0.8125rem] text-error">+ S/ {{ c.moraAplicada | soles }} mora</span> }
+              </div>
+              <div class="p-2.5 rounded-lg bg-surface-container-low">
+                <span class="block font-label-badge text-label-badge text-on-surface-variant uppercase">Crédito libre</span>
+                <span class="font-currency-md text-currency-md text-on-surface tabular-nums">S/ {{ c.creditoLibre | soles }}</span>
+                <div class="mt-1 h-1.5 bg-surface-container-high rounded-full overflow-hidden"><div class="h-full bg-secondary-container" [style.width.%]="c.usoPorcentaje"></div></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              @if (c.idEstadoPendiente) {
+                <a [routerLink]="['/pagos']" [queryParams]="{ cliente: c.id }" class="flex-1 py-2.5 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-1">
+                  <span class="material-symbols-outlined text-[1.1rem]">receipt_long</span>Cobrar S/ {{ c.totalACobrar | soles }}
+                </a>
+                <a class="w-11 h-11 rounded-lg bg-surface-container text-[#25D366] flex items-center justify-center" title="WhatsApp" target="_blank" rel="noopener" [href]="whatsapp(c)"><span class="material-symbols-outlined">chat</span></a>
+              } @else {
+                <a [routerLink]="['/nueva-compra']" [queryParams]="{ cliente: c.id }" class="flex-1 py-2.5 rounded-lg bg-surface-container-high text-on-surface font-label-lg text-label-lg flex items-center justify-center gap-1">
+                  <span class="material-symbols-outlined text-[1.1rem]">add_shopping_cart</span>Fiar
+                </a>
+              }
+              <a [routerLink]="['/clientes', c.id]" class="w-11 h-11 rounded-lg bg-surface-container text-on-surface flex items-center justify-center" title="Ver ficha"><span class="material-symbols-outlined">visibility</span></a>
+            </div>
+          </div>
+        } @empty {
+          @if (!cargando()) { <p class="py-10 text-center text-on-surface-variant">{{ vacio() }}</p> }
+        }
+      </div>
+      <div class="hidden md:block overflow-x-auto scroll-fino">
         <table class="w-full text-left border-collapse min-w-[53.75rem]">
           <thead>
             <tr class="bg-surface-container text-on-surface-variant font-label-badge text-label-badge uppercase tracking-wider">
@@ -22,6 +73,7 @@ import { FechaPipe, InicialesPipe, SolesPipe } from './formato';
             </tr>
           </thead>
           <tbody class="fp-escalonado font-body-sm text-body-sm text-on-surface">
+            @if (cargando()) { <tr><td colspan="5" class="px-space-md py-space-sm"><fp-esqueleto tipo="fila" [n]="4" /></td></tr> }
             @for (c of visibles(); track c.id; let i = $index) {
               <tr class="transition-colors" [class]="c.enMora ? (i % 2 ? 'bg-error-container/10 hover:bg-error-container/20' : 'hover:bg-error-container/10') : (i % 2 ? 'bg-surface-container-low/40 hover:bg-surface-container-high' : 'hover:bg-surface-container-high')">
                 <td class="py-4 px-space-md">
@@ -91,7 +143,7 @@ import { FechaPipe, InicialesPipe, SolesPipe } from './formato';
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="5" class="py-10 text-center text-on-surface-variant">{{ vacio() }}</td></tr>
+              @if (!cargando()) { <tr><td colspan="5" class="py-10 text-center text-on-surface-variant">{{ vacio() }}</td></tr> }
             }
           </tbody>
         </table>
@@ -120,6 +172,7 @@ export class TablaClientes {
   tienda = input<string>('la bodega');
   vacio = input<string>('Todavía no tienes clientes registrados.');
   porPagina = input<number>(8);
+  cargando = input(false);
   cambio = output<void>();
   pagina = signal(0);
   numeros = computed(() => Array.from({ length: Math.max(1, Math.ceil(this.clientes().length / this.porPagina())) }, (_, i) => i));

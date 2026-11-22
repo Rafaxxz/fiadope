@@ -23,10 +23,12 @@ const GIRO_ESTILO: Record<string, { emoji: string; icono: string; clase: string 
 interface FormTienda { ruc: string; razonSocial: string; propietario: string; giro: string; ubicacion: string; direccion: string; telefono: string; limiteGlobal: number | null; adminEmail: string; adminClave: string; }
 
 /** P03 – Gestión de tiendas (HU03). */
+import { Esqueleto } from '../../shared/esqueleto';
+import { ValidacionViva } from '../../shared/validacion-viva';
 @Component({
   selector: 'fp-tiendas',
   standalone: true,
-  imports: [FormsModule, SolesPipe, InfoTip, AyudaModal],
+  imports: [FormsModule, SolesPipe, InfoTip, AyudaModal, Esqueleto],
   templateUrl: './tiendas.html',
 })
 export class TiendasPage implements OnInit {
@@ -49,6 +51,7 @@ export class TiendasPage implements OnInit {
   confirmarBaja = signal<Tienda | null>(null);
   form: FormTienda = this.vacio();
   errores = signal<Record<string, string>>({});
+  vivo = new ValidacionViva(() => this.validar(), this.errores);
   errorForm = signal<string | null>(null);
   guardando = signal(false);
   topes = signal<Topes | null>(null);
@@ -91,14 +94,14 @@ export class TiendasPage implements OnInit {
     return { ruc: '', razonSocial: '', propietario: '', giro: 'Bodega y abarrotes', ubicacion: '', direccion: '', telefono: '', limiteGlobal: null, adminEmail: '', adminClave: '' };
   }
 
-  nueva() { this.form = this.vacio(); this.errores.set({}); this.errorForm.set(null); this.editando.set(null); this.modal.set('nueva'); }
+  nueva() { this.form = this.vacio(); this.vivo.reiniciar(); this.errores.set({}); this.errorForm.set(null); this.editando.set(null); this.modal.set('nueva'); }
 
   editar(t: Tienda) {
     this.form = { ruc: t.ruc, razonSocial: t.razonSocial, propietario: t.propietario, giro: t.giro, ubicacion: t.ubicacion, direccion: t.direccion, telefono: t.telefono, limiteGlobal: t.limiteGlobal, adminEmail: 'sin-cambio@fiadope.pe', adminClave: '' };
-    this.errores.set({}); this.errorForm.set(null); this.editando.set(t); this.modal.set('editar');
+    this.vivo.reiniciar(); this.errores.set({}); this.errorForm.set(null); this.editando.set(t); this.modal.set('editar');
   }
 
-  guardar() {
+  validar(): Record<string, string> {
     const f = this.form;
     const e: Record<string, string> = {};
     if (!/^(10|20)\d{9}$/.test(f.ruc)) e['ruc'] = 'El RUC tiene 11 dígitos y empieza con 10 o 20';
@@ -112,7 +115,13 @@ export class TiendasPage implements OnInit {
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.adminEmail)) e['adminEmail'] = 'Correo inválido';
       if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,64}$/.test(f.adminClave)) e['adminClave'] = '8+ caracteres con mayúscula, número y símbolo';
     }
-    this.errores.set(e);
+    return e;
+  }
+
+  guardar() {
+    const f = this.form;
+    const e = this.validar();
+    this.vivo.envio(e);
     if (Object.keys(e).length) return;
     this.guardando.set(true);
     const t = this.editando();

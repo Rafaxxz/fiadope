@@ -10,12 +10,14 @@ import { AyudaModal } from '../../shared/ayuda-modal';
 import { AYUDAS } from '../../shared/ayudas';
 import { FechaPipe, SolesPipe } from '../../shared/formato';
 import { TablaClientes } from '../../shared/tabla-clientes';
+import { Contador } from '../../shared/contador';
+import { Esqueleto } from '../../shared/esqueleto';
 
 /** P04 – Panel del negocio (HU04). */
 @Component({
   selector: 'fp-panel',
   standalone: true,
-  imports: [FormsModule, RouterLink, SolesPipe, FechaPipe, TablaClientes, AyudaModal],
+  imports: [FormsModule, RouterLink, SolesPipe, FechaPipe, TablaClientes, AyudaModal, Contador, Esqueleto],
   templateUrl: './panel.html',
 })
 export class PanelPage implements OnInit {
@@ -46,6 +48,9 @@ export class PanelPage implements OnInit {
       (!q || c.nombres.toLowerCase().includes(q) || c.dni.includes(q)) &&
       (f === 'todos' || (f === 'mora' ? c.enMora : !c.enMora)));
   });
+  usoLimite = computed(() => { const p = this.panel(); return p && p.limiteGlobal ? Math.min(100, (p.totalPorCobrar / p.limiteGlobal) * 100) : 0; });
+  pctMora = computed(() => { const p = this.panel(); return p && p.totalPorCobrar ? Math.min(100, (p.montoEnMora / p.totalPorCobrar) * 100) : 0; });
+  maxTop = computed(() => Math.max(0, ...(this.panel()?.topProductos ?? []).map((t) => t.monto)));
   primerMoroso = computed(() => this.panel()?.clientes.find((c) => c.idEstadoPendiente) ?? null);
 
   ngOnInit() {

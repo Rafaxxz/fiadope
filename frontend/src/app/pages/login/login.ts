@@ -1,3 +1,4 @@
+import { BotonTema } from '../../shared/boton-tema';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,7 +13,7 @@ import { InfoTip } from '../../shared/info-tip';
 @Component({
   selector: 'fp-login',
   standalone: true,
-  imports: [FormsModule, InfoTip, AyudaModal],
+  imports: [FormsModule, InfoTip, AyudaModal, BotonTema],
   templateUrl: './login.html',
 })
 export class LoginPage implements OnInit {

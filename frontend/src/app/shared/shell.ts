@@ -3,6 +3,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter } from 'rxjs';
 import { AuthService } from '../core/auth.service';
 import { AyudaModal } from './ayuda-modal';
+import { BotonTema } from './boton-tema';
 import { AYUDAS } from './ayudas';
 
 interface Enlace { ruta: string; texto: string; }
@@ -11,7 +12,7 @@ interface Enlace { ruta: string; texto: string; }
 @Component({
   selector: 'fp-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, AyudaModal],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, AyudaModal, BotonTema],
   template: `
     <header style="view-transition-name: cabecera" class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
       <div class="h-[5.5rem] w-full px-gutter lg:px-gutter-desktop max-w-[88rem] mx-auto flex items-center justify-between gap-space-md">
@@ -19,14 +20,15 @@ interface Enlace { ruta: string; texto: string; }
           <img alt="Logo FiadoPe" class="h-10 sm:h-12 w-auto object-contain" src="assets/img/logo-fiadope.png" />
         </a>
         <nav class="hidden xl:flex flex-1 min-w-0 overflow-x-auto scroll-fino py-1.5">
-          <div class="flex items-center gap-1 w-max mx-auto">
+          <div class="flex items-center gap-0.5 2xl:gap-1 w-max mx-auto">
           @for (e of enlaces(); track e.ruta) {
             <a [routerLink]="e.ruta" routerLinkActive="!bg-primary-container !text-on-primary-container shadow-[2px_3px_0px_#1c1b1b]"
-               class="font-label-lg text-label-md font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface px-3 py-2 rounded-lg transition-colors whitespace-nowrap">{{ e.texto }}</a>
+               class="font-label-lg text-label-md font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface px-2.5 2xl:px-3 py-2 rounded-lg transition-colors whitespace-nowrap">{{ e.texto }}</a>
           }
           </div>
         </nav>
         <div class="flex items-center gap-space-sm shrink-0">
+          <fp-boton-tema />
           <button class="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors" title="Guía rápida: ¿cómo funciona?" aria-label="Guía rápida de uso" type="button" (click)="ayuda.set(true)">
             <span class="material-symbols-outlined text-[1.5rem] text-primary">help</span>
           </button>
@@ -38,7 +40,7 @@ interface Enlace { ruta: string; texto: string; }
                 <span class="font-body-sm text-[0.8125rem] text-on-surface-variant">{{ rolTexto() }}</span>
               </div>
               <span class="w-11 h-11 rounded-full ring-2 ring-primary-container bg-primary-fixed text-on-primary-fixed font-headline-sm text-[1rem] flex items-center justify-center">{{ iniciales() }}</span>
-              <span class="material-symbols-outlined text-[1.25rem] text-on-surface-variant transition-transform hidden sm:inline xl:hidden min-[1700px]:inline" [class.rotate-180]="menu()">expand_more</span>
+              <span class="material-symbols-outlined text-[1.25rem] text-on-surface-variant transition-transform hidden sm:inline xl:hidden" [class.rotate-180]="menu()">expand_more</span>
             </button>
             @if (menu()) {
               <div class="fp-desplegar absolute right-0 top-[3.75rem] w-72 bg-surface-container-lowest rounded-xl shadow-[3px_4px_0px_#1c1b1b] overflow-hidden z-50">

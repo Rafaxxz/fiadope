@@ -11,10 +11,11 @@ import { AYUDAS } from '../../shared/ayudas';
 import { FechaPipe, hoyIso, InicialesPipe, MESES, SolesPipe } from '../../shared/formato';
 
 /** P09 – Corte del mes (HU09). */
+import { Esqueleto } from '../../shared/esqueleto';
 @Component({
   selector: 'fp-corte',
   standalone: true,
-  imports: [FormsModule, RouterLink, SolesPipe, FechaPipe, InicialesPipe, AyudaModal],
+  imports: [FormsModule, RouterLink, SolesPipe, FechaPipe, InicialesPipe, AyudaModal, Esqueleto],
   templateUrl: './corte.html',
 })
 export class CortePage implements OnInit {

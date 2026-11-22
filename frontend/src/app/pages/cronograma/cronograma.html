@@ -153,11 +153,19 @@
       </button>
     </div>
   } @else if (!id()) {
-    <div class="p-space-xl rounded-xl bg-surface-container-lowest text-center text-on-surface-variant shadow-sm">
-      <span class="material-symbols-outlined text-[2.75rem] text-outline">calendar_month</span>
-      <p class="font-body-md text-body-md mt-2">Elige un cliente y una compra en cuotas para ver su tabla francesa.</p>
-      <a routerLink="/nueva-compra" class="inline-flex mt-3 px-4 py-2 rounded-lg bg-primary-container text-on-primary-container font-label-lg text-label-lg">Registrar una compra en cuotas</a>
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl flex flex-col items-center text-center gap-space-sm">
+      <div class="w-16 h-16 rounded-full bg-primary-fixed/60 flex items-center justify-center"><span class="material-symbols-outlined text-[2rem] text-primary">calendar_month</span></div>
+      <h2 class="font-headline-sm text-headline-sm text-on-surface">{{ idCliente() ? 'Ahora elige una de sus compras en cuotas' : 'Elige a un vecino para ver su cronograma' }}</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-xl">Verás la tabla francesa completa: cada cuota con su interés, amortización y saldo, el periodo de gracia y la fecha de vencimiento. Puedes descargarla en PDF o imprimirla como ticket.</p>
+      <div class="flex flex-wrap justify-center gap-2 mt-space-xs">
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container font-label-md text-label-md"><span class="material-symbols-outlined text-[1.1rem] text-primary">table_chart</span>Tabla francesa</span>
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container font-label-md text-label-md"><span class="material-symbols-outlined text-[1.1rem] text-secondary">hourglass_top</span>Gracia total</span>
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container font-label-md text-label-md"><span class="material-symbols-outlined text-[1.1rem] text-tertiary">picture_as_pdf</span>PDF y ticket</span>
+      </div>
+      <a routerLink="/nueva-compra" class="inline-flex items-center gap-1 mt-space-sm px-4 py-2.5 rounded-lg bg-primary-container text-on-primary-container font-label-lg text-label-lg"><span class="material-symbols-outlined text-[1.1rem]">add_shopping_cart</span>Registrar una compra en cuotas</a>
     </div>
+  } @else {
+    <div class="flex flex-col gap-space-md"><fp-esqueleto tipo="bloque" alto="12rem" /><fp-esqueleto tipo="lista" [n]="6" /></div>
   }
 </div>
 @if (ayuda()) {

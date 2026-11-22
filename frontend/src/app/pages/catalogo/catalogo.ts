@@ -23,10 +23,12 @@ export const CATEGORIAS = [
 interface FormProducto { nombre: string; categoria: string; sku: string; marca: string; proveedor: string; unidad: string; precioContado: number | null; precioLista: number | null; permiteFinMes: boolean; permiteCuotas: boolean; imagenUrl: string | null; }
 
 /** P05 – Catálogo de productos (HU05). */
+import { Esqueleto } from '../../shared/esqueleto';
+import { ValidacionViva } from '../../shared/validacion-viva';
 @Component({
   selector: 'fp-catalogo',
   standalone: true,
-  imports: [FormsModule, RouterLink, SolesPipe, InfoTip, AyudaModal, ProductoImg],
+  imports: [FormsModule, RouterLink, SolesPipe, InfoTip, AyudaModal, ProductoImg, Esqueleto],
   templateUrl: './catalogo.html',
 })
 export class CatalogoPage implements OnInit {
@@ -37,6 +39,7 @@ export class CatalogoPage implements OnInit {
   categorias = CATEGORIAS;
   ayudaCatalogo = AYUDAS['catalogo'];
   productos = signal<Producto[]>([]);
+  cargando = signal(true);
   categoria = signal<string>('');
   q = signal('');
   verBajas = signal(false);
@@ -45,6 +48,7 @@ export class CatalogoPage implements OnInit {
   editando = signal<Producto | null>(null);
   form: FormProducto = this.vacio();
   errores = signal<Record<string, string>>({});
+  vivo = new ValidacionViva(() => this.validar(), this.errores, { finmes: 'modalidades', cuotas: 'modalidades' });
   errorForm = signal<string | null>(null);
   guardando = signal(false);
   subiendo = signal(false);
@@ -68,7 +72,7 @@ export class CatalogoPage implements OnInit {
   ngOnInit() { this.cargar(); }
 
   cargar() {
-    this.api.productos().subscribe({ next: (p) => this.productos.set(p), error: (e) => this.avisos.error(mensajeError(e)) });
+    this.api.productos().subscribe({ next: (p) => { this.productos.set(p); this.cargando.set(false); }, error: (e) => { this.cargando.set(false); this.avisos.error(mensajeError(e)); } });
   }
 
   emoji(c: string) { return CATEGORIAS.find((x) => x.valor === c)?.emoji ?? '🧺'; }
@@ -78,11 +82,11 @@ export class CatalogoPage implements OnInit {
     return { nombre: '', categoria: 'Abarrotes y granel', sku: '', marca: '', proveedor: '', unidad: 'UND', precioContado: null, precioLista: null, permiteFinMes: true, permiteCuotas: false, imagenUrl: null };
   }
 
-  nuevo() { this.form = this.vacio(); this.editando.set(null); this.errores.set({}); this.errorForm.set(null); this.modal.set(true); }
+  nuevo() { this.form = this.vacio(); this.vivo.reiniciar(); this.editando.set(null); this.errores.set({}); this.errorForm.set(null); this.modal.set(true); }
 
   editar(p: Producto) {
     this.form = { nombre: p.nombre, categoria: p.categoria, sku: p.sku, marca: p.marca ?? '', proveedor: p.proveedor ?? '', unidad: p.unidad, precioContado: p.precioContado, precioLista: p.precioLista, permiteFinMes: p.permiteFinMes, permiteCuotas: p.permiteCuotas, imagenUrl: p.imagenUrl };
-    this.editando.set(p); this.errores.set({}); this.errorForm.set(null); this.modal.set(true);
+    this.editando.set(p); this.vivo.reiniciar(); this.errores.set({}); this.errorForm.set(null); this.modal.set(true);
   }
 
   elegirImagen(ev: Event) {
@@ -99,7 +103,7 @@ export class CatalogoPage implements OnInit {
     });
   }
 
-  guardar() {
+  validar(): Record<string, string> {
     const f = this.form;
     const e: Record<string, string> = {};
     if (!f.nombre.trim()) e['nombre'] = 'Ingresa el nombre';
@@ -108,7 +112,13 @@ export class CatalogoPage implements OnInit {
     if (f.precioLista === null || f.precioLista === undefined) e['precioLista'] = 'Ingresa el precio de lista';
     else if (f.precioContado && f.precioLista < f.precioContado) e['precioLista'] = 'El precio de lista debe ser mayor o igual al precio contado';
     if (!f.permiteFinMes && !f.permiteCuotas) e['modalidades'] = 'Marca al menos una modalidad: fin de mes o cuotas';
-    this.errores.set(e);
+    return e;
+  }
+
+  guardar() {
+    const f = this.form;
+    const e = this.validar();
+    this.vivo.envio(e);
     if (Object.keys(e).length) return;
     this.guardando.set(true);
     const p = this.editando();

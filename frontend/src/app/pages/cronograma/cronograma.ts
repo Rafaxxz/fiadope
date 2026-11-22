@@ -13,10 +13,11 @@ import { InfoTip } from '../../shared/info-tip';
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 /** P08 – Cronograma de cuotas (HU08). También lo usa el cliente desde «Mi libreta». */
+import { Esqueleto } from '../../shared/esqueleto';
 @Component({
   selector: 'fp-cronograma',
   standalone: true,
-  imports: [FormsModule, RouterLink, SolesPipe, FechaPipe, InfoTip, AyudaModal],
+  imports: [FormsModule, RouterLink, SolesPipe, FechaPipe, InfoTip, AyudaModal, Esqueleto],
   templateUrl: './cronograma.html',
 })
 export class CronogramaPage {

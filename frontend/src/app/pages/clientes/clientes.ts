@@ -20,7 +20,7 @@ import { TablaClientes } from '../../shared/tabla-clientes';
         <div>
           <span class="font-label-badge text-label-badge px-2.5 py-1 rounded-lg bg-secondary-container text-on-secondary uppercase shadow-sm">Libretas del barrio</span>
           <h1 class="font-headline-lg text-headline-lg text-on-surface uppercase tracking-tight mt-2">Mis <span class="text-primary-container">clientes</span></h1>
-          <p class="font-body-md text-body-md text-on-surface-variant">{{ clientes().length }} vecinos · límite asignado S/ {{ asignado() | soles }} de S/ {{ auth.perfil()?.tienda?.limiteGlobal | soles }}</p>
+          <p class="font-body-md text-body-md text-on-surface-variant">{{ clientes().length }} {{ clientes().length === 1 ? 'vecino' : 'vecinos' }} · límite asignado S/ {{ asignado() | soles }} de S/ {{ auth.perfil()?.tienda?.limiteGlobal | soles }}</p>
         </div>
         <div class="flex items-center gap-space-sm w-full md:w-auto">
           <div class="relative w-full md:w-80">
@@ -32,7 +32,7 @@ import { TablaClientes } from '../../shared/tabla-clientes';
           </a>
         </div>
       </div>
-      <fp-tabla-clientes [clientes]="filtrados()" [tienda]="auth.perfil()?.tienda?.razonSocial ?? ''" [porPagina]="10"
+      <fp-tabla-clientes [clientes]="filtrados()" [tienda]="auth.perfil()?.tienda?.razonSocial ?? ''" [porPagina]="10" [cargando]="cargando()"
                          pie="Haz clic en el nombre para ver la ficha, sus condiciones y su consentimiento." vacio="No hay clientes que coincidan." />
     </div>`,
 })
@@ -42,10 +42,11 @@ export class ClientesPage implements OnInit {
   auth = inject(AuthService);
   clientes = signal<ClienteResumen[]>([]);
   q = signal('');
+  cargando = signal(true);
   filtrados = computed(() => {
     const q = this.q().toLowerCase().trim();
     return this.clientes().filter((c) => !q || c.nombres.toLowerCase().includes(q) || c.dni.includes(q));
   });
   asignado = computed(() => this.clientes().filter((c) => c.estadoCliente === 'ACTIVO').reduce((s, c) => s + Number(c.limite), 0));
-  ngOnInit() { this.api.clientes().subscribe({ next: (c) => this.clientes.set(c), error: (e) => this.avisos.error(mensajeError(e)) }); }
+  ngOnInit() { this.api.clientes().subscribe({ next: (c) => { this.clientes.set(c); this.cargando.set(false); }, error: (e) => { this.cargando.set(false); this.avisos.error(mensajeError(e)); } }); }
 }

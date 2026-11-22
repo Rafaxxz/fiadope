@@ -34,10 +34,12 @@ function teaEquivalente(tipo: string, tasaPct: number, plazo: number, cap: numbe
 }
 
 /** P06 – Ficha de cliente (HU06): ver, registrar y editar condiciones. */
+import { Esqueleto } from '../../shared/esqueleto';
+import { ValidacionViva } from '../../shared/validacion-viva';
 @Component({
   selector: 'fp-ficha',
   standalone: true,
-  imports: [FormsModule, RouterLink, SolesPipe, FechaPipe, HoraPipe, InicialesPipe, InfoTip, AyudaModal],
+  imports: [FormsModule, RouterLink, SolesPipe, FechaPipe, HoraPipe, InicialesPipe, InfoTip, AyudaModal, Esqueleto],
   templateUrl: './ficha.html',
 })
 export class FichaPage implements OnInit {
@@ -55,6 +57,7 @@ export class FichaPage implements OnInit {
   topes = signal<Topes | null>(null);
   form: ClienteRequest = this.vacio();
   errores = signal<Record<string, string>>({});
+  vivo = new ValidacionViva(() => this.validar(), this.errores, { limite: 'limiteCredito', tasa: 'tasaPorcentaje', tasaMora: 'tasaMoraPorcentaje', acepta: 'aceptaPolitica' });
   errorForm = signal<string | null>(null);
   guardando = signal(false);
   ayuda = signal(false);
@@ -101,13 +104,13 @@ export class FichaPage implements OnInit {
   editar() {
     const f = this.ficha()!;
     this.form = { dni: f.dni, nombres: f.nombres, direccion: f.direccion, telefono: f.telefono, email: f.email, clave: '', tipoTasa: f.tipoTasa, diasPlazoTasa: f.diasPlazoTasa, diasCapitalizacion: f.diasCapitalizacion ?? 1, tasaPorcentaje: f.tasaPorcentaje, tipoTasaMora: f.tipoTasaMora, tasaMoraPorcentaje: f.tasaMoraPorcentaje, moneda: f.moneda, limiteCredito: f.limiteCredito, maxMeses: f.maxMeses, diaCorte: f.diaCorte, diaPago: f.diaPago, aceptaPolitica: true };
-    this.errores.set({}); this.errorForm.set(null); this.version.update((v) => v + 1);
+    this.vivo.reiniciar(); this.errores.set({}); this.errorForm.set(null); this.version.update((v) => v + 1);
     this.modo.set('editar');
   }
 
   cambio() { this.version.update((v) => v + 1); }
 
-  guardar() {
+  validar(): Record<string, string> {
     const f = this.form;
     const e: Record<string, string> = {};
     const nuevo = this.modo() === 'nuevo';
@@ -128,7 +131,14 @@ export class FichaPage implements OnInit {
     if (f.diaPago < 1 || f.diaPago > 28) e['diaPago'] = 'Entre 1 y 28';
     if (f.diaCorte === f.diaPago) e['diaPago'] = 'El día de corte y el día de pago deben ser distintos';
     if (!f.aceptaPolitica) e['aceptaPolitica'] = 'El cliente debe aceptar la Política de Privacidad para registrarlo';
-    this.errores.set(e);
+    return e;
+  }
+
+  guardar() {
+    const f = this.form;
+    const nuevo = this.modo() === 'nuevo';
+    const e = this.validar();
+    this.vivo.envio(e);
     if (Object.keys(e).length) { this.errorForm.set('Revisa los campos marcados'); return; }
     this.errorForm.set(null);
     this.guardando.set(true);
@@ -167,5 +177,16 @@ export class FichaPage implements OnInit {
     window.open(`https://wa.me/51${f.telefono}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener');
   }
 
-  imprimir() { window.print(); }
+  hoy = new Date().toISOString().substring(0, 10);
+
+  /** Imprime solo la hoja de confianza (siempre en colores claros, también desde el modo oscuro). */
+  imprimir() {
+    const html = document.documentElement;
+    const oscuro = html.classList.contains('dark');
+    html.classList.add('imprimir-hoja');
+    if (oscuro) html.classList.remove('dark');
+    const fin = () => { html.classList.remove('imprimir-hoja'); if (oscuro) html.classList.add('dark'); window.removeEventListener('afterprint', fin); };
+    window.addEventListener('afterprint', fin);
+    setTimeout(() => window.print(), 50);
+  }
 }

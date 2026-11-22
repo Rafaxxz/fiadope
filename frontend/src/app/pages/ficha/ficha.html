@@ -23,6 +23,9 @@
     </div>
   </div>
 
+  @if (modo() === 'ver' && !f) {
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg"><div class="lg:col-span-4 flex flex-col gap-space-md"><fp-esqueleto tipo="bloque" alto="22rem" /><fp-esqueleto tipo="bloque" alto="10rem" /></div><div class="lg:col-span-8 flex flex-col gap-space-md"><fp-esqueleto tipo="bloque" alto="16rem" /><fp-esqueleto tipo="lista" [n]="4" /></div></div>
+  }
   @if (modo() === 'ver' && f) {
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
       <!-- Columna izquierda: credencial -->
@@ -235,7 +238,7 @@
 
   <!-- Formulario: nuevo o editar -->
   @if (modo() !== 'ver') {
-    <form class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg" (ngSubmit)="guardar()" novalidate>
+    <form class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg" (focusout)="vivo.tocar($event)" (input)="vivo.revisar($event)" (change)="vivo.revisar($event)" (ngSubmit)="guardar()" novalidate>
       @if (errorForm()) { <p class="lg:col-span-12 p-3 rounded-lg bg-error-container text-on-error-container font-body-sm text-body-sm font-semibold flex items-center gap-2" role="alert"><span class="material-symbols-outlined">error</span>{{ errorForm() }}</p> }
       <div class="lg:col-span-4 flex flex-col gap-space-md">
         <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col gap-space-md">
@@ -370,4 +373,68 @@
 }
 @if (ayuda()) {
   <fp-ayuda titulo="Guía de la Ficha Vecinal" subtitulo="Reglas de confianza para cobrar sin perder la amistad" [pasos]="ayudaClientes.pasos" boton="¡Entendido, gracias!" (cerrar)="ayuda.set(false)" />
+}
+
+<!-- Hoja de confianza: solo se ve al imprimir o guardar como PDF -->
+@if (f && modo() === 'ver') {
+  <section class="hoja-impresion" aria-hidden="true">
+    <div class="hoja-cabecera">
+      <img src="assets/img/logo-fiadope.png" alt="FiadoPe" class="h-12" />
+      <div class="text-right">
+        <div class="hoja-titulo">Hoja de confianza</div>
+        <div>Cuenta corriente vecinal · {{ auth.perfil()?.tienda?.razonSocial }}</div>
+        <div>Emitida el {{ hoy | fecha }} · Libreta N.º {{ f.id }}</div>
+      </div>
+    </div>
+    <div class="hoja-franja"></div>
+
+    <h2>1. Titular de la libreta</h2>
+    <table class="hoja-datos">
+      <tr><th>Nombres</th><td>{{ f.nombres }}</td><th>DNI</th><td>{{ f.dni }}</td></tr>
+      <tr><th>Dirección</th><td>{{ f.direccion }}</td><th>Celular</th><td>{{ f.telefono }}</td></tr>
+      <tr><th>Correo</th><td>{{ f.email }}</td><th>Cliente desde</th><td>{{ f.fechaRegistro | fecha }}</td></tr>
+    </table>
+
+    <h2>2. Condiciones pactadas</h2>
+    <table class="hoja-datos">
+      <tr><th>Línea de crédito</th><td>S/ {{ f.limiteCredito | soles }}</td><th>Moneda</th><td>{{ f.moneda }}</td></tr>
+      <tr><th>Tasa compensatoria</th><td>{{ f.tipoTasa === 'NOMINAL' ? 'Nominal' : 'Efectiva' }} {{ f.tasaPorcentaje }} % · TEA {{ f.teaPorcentaje.toFixed(4) }} %</td><th>TED / TEM</th><td>{{ f.tedPorcentaje.toFixed(7) }} % / {{ f.temPorcentaje.toFixed(4) }} %</td></tr>
+      <tr><th>Tasa moratoria</th><td>{{ f.tipoTasaMora === 'NOMINAL' ? 'Nominal' : 'Efectiva' }} {{ f.tasaMoraPorcentaje }} % · TEA {{ f.teaMoraPorcentaje.toFixed(4) }} %</td><th>Cuotas máximas</th><td>{{ f.maxMeses }}</td></tr>
+      <tr><th>Día de corte</th><td>Día {{ f.diaCorte }} de cada mes</td><th>Día de pago</th><td>Día {{ f.diaPago }} de cada mes</td></tr>
+    </table>
+
+    <h2>3. Estado de la cuenta al {{ hoy | fecha }}</h2>
+    <div class="hoja-resumen">
+      <div><span>Saldo al corte</span><strong>S/ {{ f.resumen.saldoAlCorte | soles }}</strong></div>
+      <div><span>Mora a hoy{{ f.resumen.enMora ? ' (' + f.resumen.diasMora + ' días)' : '' }}</span><strong>S/ {{ f.resumen.moraAplicada | soles }}</strong></div>
+      <div><span>Total a cobrar</span><strong>S/ {{ f.resumen.totalACobrar | soles }}</strong></div>
+      <div><span>Crédito disponible</span><strong>S/ {{ f.resumen.creditoLibre | soles }}</strong></div>
+    </div>
+
+    <h2>4. Compras registradas</h2>
+    <table class="hoja-tabla">
+      <thead><tr><th>Fecha</th><th>Producto</th><th>Modalidad</th><th class="num">Capital</th><th class="num">Interés</th><th class="num">Total</th><th>Estado</th></tr></thead>
+      <tbody>
+        @for (c of f.compras; track c.id) {
+          <tr>
+            <td>{{ c.fechaHora | fecha }}</td><td>{{ c.producto }} × {{ c.cantidad }}</td>
+            <td>{{ c.modalidad === 'CUOTAS' ? c.nCuotas + ' cuotas' : 'Fin de mes' }}</td>
+            <td class="num">S/ {{ c.capital | soles }}</td><td class="num">S/ {{ c.interes | soles }}</td><td class="num">S/ {{ c.totalPlazo | soles }}</td>
+            <td>{{ c.pagada ? 'Pagada' : 'Pendiente' }}</td>
+          </tr>
+        } @empty { <tr><td colspan="7">Sin compras registradas.</td></tr> }
+      </tbody>
+    </table>
+
+    <h2>5. Consentimiento</h2>
+    <p>{{ f.nombres }} (DNI {{ f.dni }}) autoriza de forma expresa e informada el registro de su cuenta corriente en FiadoPe de {{ auth.perfil()?.tienda?.razonSocial }}
+      y acepta la Política de Privacidad según la Ley N.º 29733 (Ley de Protección de Datos Personales del Perú).
+      @if (f.consentimiento; as k) { Política {{ k.version }} aceptada el {{ k.fechaHora | fecha }} a las {{ k.fechaHora | hora }} (IP {{ k.ip }}). }</p>
+    <p class="hoja-nota">Los intereses se calculan con año de 360 días y respetan los topes del BCRP. Cada operación queda registrada en la bitácora de FiadoPe.</p>
+
+    <div class="hoja-firmas">
+      <div><span></span>{{ f.nombres }}<br />DNI {{ f.dni }}</div>
+      <div><span></span>{{ auth.perfil()?.nombre }}<br />{{ auth.perfil()?.tienda?.razonSocial }}</div>
+    </div>
+  </section>
 }

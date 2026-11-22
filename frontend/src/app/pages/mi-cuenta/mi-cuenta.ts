@@ -10,10 +10,11 @@ import { InfoTip } from '../../shared/info-tip';
 import { ProductoImg } from '../../shared/producto-img';
 
 /** P11 – Mi cuenta (HU11): portal del cliente pensado para el celular. */
+import { Esqueleto } from '../../shared/esqueleto';
 @Component({
   selector: 'fp-mi-cuenta',
   standalone: true,
-  imports: [SolesPipe, FechaPipe, InicialesPipe, InfoTip, AyudaModal, ProductoImg],
+  imports: [SolesPipe, FechaPipe, InicialesPipe, InfoTip, AyudaModal, ProductoImg, Esqueleto],
   templateUrl: './mi-cuenta.html',
 })
 export class MiCuentaPage implements OnInit {

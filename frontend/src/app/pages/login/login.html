@@ -7,10 +7,13 @@
           <span class="inline-block w-3 h-3 rounded-full bg-secondary-container"></span>
           <span class="font-label-badge text-label-badge text-on-surface-variant uppercase tracking-wider">Terminal Mostrador v1.0</span>
         </div>
-        <button aria-label="Abrir guía de cómo funciona" class="group inline-flex items-center gap-space-xs bg-tertiary-fixed text-on-tertiary-fixed font-headline-sm text-headline-sm px-3 py-1.5 rounded-full shadow-[2px_3px_0px_#1c1b1b] active:translate-y-0.5 active:shadow-[0px_0px_0px_#1c1b1b] transition-all" type="button" (click)="ayuda.set(true)">
+        <div class="flex items-center gap-2">
+          <fp-boton-tema />
+          <button aria-label="Abrir guía de cómo funciona" class="group inline-flex items-center gap-space-xs bg-tertiary-fixed text-on-tertiary-fixed font-headline-sm text-headline-sm px-3 py-1.5 rounded-full shadow-[2px_3px_0px_#1c1b1b] active:translate-y-0.5 active:shadow-[0px_0px_0px_#1c1b1b] transition-all" type="button" (click)="ayuda.set(true)">
           <span class="material-symbols-outlined text-lg fill-1">help</span>
           <span class="font-label-badge text-label-badge uppercase tracking-wider">¿Cómo funciona?</span>
         </button>
+        </div>
       </div>
 
       <div class="relative bg-surface-container-lowest rounded-xl shadow-[4px_6px_0px_#1c1b1b] overflow-hidden">
