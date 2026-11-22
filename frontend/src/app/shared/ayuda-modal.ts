@@ -6,9 +6,10 @@ export interface PasoAyuda { titulo: string; texto: string; }
 @Component({
   selector: 'fp-ayuda',
   standalone: true,
+  host: { '(document:keydown.escape)': 'cerrar.emit()' },
   template: `
-    <div class="fixed inset-0 bg-inverse-surface/60 backdrop-blur-sm z-[60] flex items-center justify-center p-space-md" (click)="cerrar.emit()">
-      <div class="relative w-full max-w-lg bg-surface-container-lowest rounded-xl shadow-[6px_8px_0px_#1c1b1b] overflow-hidden flex flex-col max-h-[90vh]" (click)="$event.stopPropagation()">
+    <div role="dialog" aria-modal="true" class="fp-fondo fixed inset-0 bg-inverse-surface/60 backdrop-blur-sm z-[60] flex items-center justify-center p-space-md" (click)="cerrar.emit()">
+      <div class="fp-dialogo relative w-full max-w-xl bg-surface-container-lowest rounded-xl shadow-[6px_8px_0px_#1c1b1b] overflow-hidden flex flex-col max-h-[90vh]" (click)="$event.stopPropagation()">
         <div class="h-2 w-full bg-gradient-to-r from-primary-container via-secondary-container to-tertiary-fixed"></div>
         <div class="p-space-lg flex items-center justify-between bg-surface-container-low">
           <div class="flex items-center gap-2">

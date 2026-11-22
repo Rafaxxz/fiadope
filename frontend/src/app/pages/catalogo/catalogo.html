@@ -51,12 +51,12 @@
           <p class="font-body-sm text-body-sm text-on-surface-variant">El precio de lista (fiado) nunca es menor al contado. Diferencia promedio en tu catálogo: +{{ margenPromedio().toFixed(1) }}% · {{ enCuotas() }} productos se pueden fiar en cuotas.</p>
         </div>
       </div>
-      <span class="font-label-badge text-label-badge uppercase px-space-sm py-1 bg-surface-container-lowest text-secondary rounded-full shadow-sm self-end sm:self-auto">Margen seguro para {{ auth.perfil()?.tienda?.razonSocial }}</span>
+      <span class="font-label-badge text-label-badge uppercase px-space-sm py-1 bg-surface-container-lowest text-secondary rounded-full shadow-sm self-end sm:self-auto sm:whitespace-nowrap">Margen seguro para {{ auth.perfil()?.tienda?.razonSocial }}</span>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
       @for (p of filtrados(); track p.id) {
-        <article class="flex flex-col bg-surface-container-lowest rounded-xl p-space-md relative transition-shadow"
+        <article class="tarjeta-producto flex flex-col bg-surface-container-lowest rounded-xl p-space-md relative transition-all duration-200 hover:-translate-y-0.5"
                  [class]="p.permiteCuotas && !p.permiteFinMes ? 'shadow-md ring-2 ring-primary-container/20' : 'shadow-sm hover:shadow-md'" [class.opacity-70]="p.estado === 'BAJA'">
           <div class="relative w-full h-44 rounded-lg overflow-hidden bg-surface-container-low mb-space-md">
             <fp-producto-img class="w-full h-full" [url]="p.imagenUrl" [categoria]="p.categoria" [alt]="p.nombre" [tamano]="64" />
