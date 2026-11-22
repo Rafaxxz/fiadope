@@ -206,6 +206,17 @@
         </div>
       </div>
     </div>
+  } @else if (!error()) {
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl flex flex-col items-center text-center gap-space-sm">
+      <div class="w-16 h-16 rounded-full bg-primary-fixed/60 flex items-center justify-center"><span class="material-symbols-outlined text-[2rem] text-primary">point_of_sale</span></div>
+      <h2 class="font-headline-sm text-headline-sm text-on-surface">Elige al vecino que viene a pagar</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-xl">Verás su estado de cuenta, la mora a la fecha (si la hay) y el total exacto a cobrar antes de confirmar el pago con Yape, Plin, transferencia o efectivo.</p>
+      <div class="flex flex-wrap justify-center gap-2 mt-space-xs">
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container font-label-md text-label-md"><span class="material-symbols-outlined text-[1.1rem] text-primary">receipt_long</span>Estado de cuenta</span>
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container font-label-md text-label-md"><span class="material-symbols-outlined text-[1.1rem] text-secondary">timer</span>Mora al día</span>
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container font-label-md text-label-md"><span class="material-symbols-outlined text-[1.1rem] text-[#00a844]">verified</span>Comprobante</span>
+      </div>
+    </div>
   }
 </div>
 @if (ayuda()) {

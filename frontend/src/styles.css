@@ -14,6 +14,22 @@
   [hidden] { display: none !important; }
   /* Iconos en rem para que crezcan junto con el texto (las clases text-* los siguen ajustando) */
   .material-symbols-outlined { font-size: 1.5rem; }
+  html { scroll-behavior: smooth; }
+  ::selection { background: #ffd9e2; color: #3e001e; }
+  button:not(:disabled), [role='button'], select, label[for], summary { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
+  /* Foco visible para quien usa teclado (no aparece al hacer clic) */
+  :where(a, button, select, input, textarea, [tabindex]):focus-visible { outline: 3px solid #e6007e; outline-offset: 2px; border-radius: 0.5rem; }
+  /* Selects con flecha propia y espacio para ella */
+  select.campo { appearance: none; padding-right: 2.75rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%235a3f47'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.5rem; }
+}
+
+/* Entrada suave de cada pantalla */
+@keyframes fp-entrar { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+main > router-outlet + * { animation: fp-entrar 0.25s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 
 .chicha-gradient { background: linear-gradient(90deg, #E6007E 0%, #FF6B00 50%, #FFE600 100%); }
@@ -26,7 +42,7 @@
 /* Campos de formulario con el estilo de los mockups */
 .campo { @apply w-full px-3.5 py-3 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:outline-none shadow-sm focus:shadow-[2px_3px_0px_#1c1b1b] transition-all; }
 .campo.invalido { @apply ring-2 ring-error bg-error-container/30; }
-.etiqueta { @apply font-label-lg text-label-lg text-on-surface flex items-center gap-1; }
+.etiqueta { @apply font-label-lg text-label-lg text-on-surface flex items-center gap-1 min-h-[1.75rem]; }
 .error-campo { @apply font-body-sm text-[0.8125rem] text-error font-semibold mt-1 flex items-center gap-1; }
 
 @media print {
