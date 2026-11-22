@@ -13,7 +13,7 @@ interface Enlace { ruta: string; texto: string; }
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, AyudaModal],
   template: `
-    <header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+    <header style="view-transition-name: cabecera" class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
       <div class="h-[5.5rem] w-full px-gutter lg:px-gutter-desktop max-w-[88rem] mx-auto flex items-center justify-between gap-space-md">
         <a [routerLink]="auth.inicio()" class="flex items-center gap-space-sm shrink-0" aria-label="Ir al inicio">
           <img alt="Logo FiadoPe" class="h-10 sm:h-12 w-auto object-contain" src="assets/img/logo-fiadope.png" />
@@ -38,10 +38,10 @@ interface Enlace { ruta: string; texto: string; }
                 <span class="font-body-sm text-[0.8125rem] text-on-surface-variant">{{ rolTexto() }}</span>
               </div>
               <span class="w-11 h-11 rounded-full ring-2 ring-primary-container bg-primary-fixed text-on-primary-fixed font-headline-sm text-[1rem] flex items-center justify-center">{{ iniciales() }}</span>
-              <span class="material-symbols-outlined text-[1.25rem] text-on-surface-variant hidden sm:inline xl:hidden min-[1700px]:inline">expand_more</span>
+              <span class="material-symbols-outlined text-[1.25rem] text-on-surface-variant transition-transform hidden sm:inline xl:hidden min-[1700px]:inline" [class.rotate-180]="menu()">expand_more</span>
             </button>
             @if (menu()) {
-              <div class="absolute right-0 top-[3.75rem] w-72 bg-surface-container-lowest rounded-xl shadow-[3px_4px_0px_#1c1b1b] overflow-hidden z-50">
+              <div class="fp-desplegar absolute right-0 top-[3.75rem] w-72 bg-surface-container-lowest rounded-xl shadow-[3px_4px_0px_#1c1b1b] overflow-hidden z-50">
                 <div class="h-1.5 chicha-gradient"></div>
                 <div class="p-4 border-b border-outline-variant/30">
                   <p class="font-label-lg text-label-lg text-on-surface">{{ perfil()?.nombre }}</p>
@@ -63,7 +63,7 @@ interface Enlace { ruta: string; texto: string; }
       </div>
       <div class="h-1.5 w-full chicha-gradient"></div>
       @if (movil()) {
-        <nav class="xl:hidden bg-surface-container-lowest px-gutter py-3 grid grid-cols-2 sm:grid-cols-4 gap-1.5 shadow-md">
+        <nav class="fp-desplegar xl:hidden bg-surface-container-lowest px-gutter py-3 grid grid-cols-2 sm:grid-cols-4 gap-1.5 shadow-md">
           @for (e of enlaces(); track e.ruta) {
             <a [routerLink]="e.ruta" (click)="movil.set(false)" routerLinkActive="!bg-primary-container !text-on-primary-container font-bold"
                class="font-label-lg text-label-lg text-on-surface-variant px-3 py-3 rounded-lg bg-surface-container-low hover:bg-surface-container">{{ e.texto }}</a>
@@ -74,7 +74,7 @@ interface Enlace { ruta: string; texto: string; }
     <main class="w-full pt-[5.875rem] bg-surface min-h-[calc(100vh-5.5rem)]">
       <router-outlet />
     </main>
-    <footer class="w-full bg-surface-container-low border-t border-outline-variant/30 py-space-xl mt-space-xl">
+    <footer style="view-transition-name: pie" class="w-full bg-surface-container-low border-t border-outline-variant/30 py-space-xl mt-space-xl">
       <div class="max-w-[88rem] mx-auto px-gutter lg:px-gutter-desktop flex flex-col md:flex-row items-center justify-between gap-space-md text-center md:text-left">
         <div class="flex flex-col items-center md:items-start gap-1">
           <div class="flex items-center gap-space-sm">

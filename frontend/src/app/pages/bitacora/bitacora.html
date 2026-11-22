@@ -15,7 +15,7 @@
     </button>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+  <div class="fp-escalonado grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
     <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-1">
       <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-badge text-label-badge uppercase tracking-wider">EVENTOS REGISTRADOS</span><span class="material-symbols-outlined text-primary">fact_check</span></div>
       <span class="font-currency-display text-currency-display text-on-surface">{{ p?.total ?? 0 }}</span>
@@ -89,7 +89,7 @@
             <th class="whitespace-nowrap py-3 px-4">Valor anterior</th><th class="whitespace-nowrap py-3 px-4">Valor nuevo</th><th class="whitespace-nowrap py-3 px-4">Dirección IP</th><th class="whitespace-nowrap py-3 px-4 text-center">Estado</th>
           </tr>
         </thead>
-        <tbody class="font-body-sm text-body-sm text-on-surface">
+        <tbody class="fp-escalonado font-body-sm text-body-sm text-on-surface">
           @if (cargando()) { <tr><td colspan="7" class="py-10 text-center text-on-surface-variant">Consultando la bitácora…</td></tr> }
           @for (r of p?.contenido ?? []; track r.id; let impar = $odd) {
             @let antes = campos(r.valorAntes);

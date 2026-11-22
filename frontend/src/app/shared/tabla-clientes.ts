@@ -21,7 +21,7 @@ import { FechaPipe, InicialesPipe, SolesPipe } from './formato';
               <th class="whitespace-nowrap py-3 px-space-md text-right">Acciones Rápidas</th>
             </tr>
           </thead>
-          <tbody class="font-body-sm text-body-sm text-on-surface">
+          <tbody class="fp-escalonado font-body-sm text-body-sm text-on-surface">
             @for (c of visibles(); track c.id; let i = $index) {
               <tr class="transition-colors" [class]="c.enMora ? (i % 2 ? 'bg-error-container/10 hover:bg-error-container/20' : 'hover:bg-error-container/10') : (i % 2 ? 'bg-surface-container-low/40 hover:bg-surface-container-high' : 'hover:bg-surface-container-high')">
                 <td class="py-4 px-space-md">

@@ -24,22 +24,57 @@
   select.campo { appearance: none; padding-right: 2.75rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%235a3f47'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.5rem; }
 }
 
+/* ===== Movimiento =====
+   Una sola curva suave (sale rápido y frena con delicadeza) y solo se animan opacity/transform,
+   que el navegador mueve en la GPU sin recalcular el diseño. */
+:root { --fp-curva: cubic-bezier(0.22, 1, 0.36, 1); --fp-rebote: cubic-bezier(0.34, 1.4, 0.64, 1); }
+
 /* Foto del producto con un leve zoom al pasar el mouse */
-.tarjeta-producto img { transition: transform 0.35s ease; }
-.tarjeta-producto:hover img { transform: scale(1.05); }
+.tarjeta-producto { will-change: transform; }
+.tarjeta-producto img { transition: transform 0.6s var(--fp-curva); }
+.tarjeta-producto:hover { box-shadow: 0 12px 28px -12px rgba(28, 27, 27, 0.28); }
+.tarjeta-producto:hover img { transform: scale(1.06); }
 
 /* Ventanas de ayuda */
 @keyframes fp-aparecer { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fp-subir { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
-.fp-fondo { animation: fp-aparecer 0.15s ease-out both; }
-.fp-dialogo { animation: fp-subir 0.2s ease-out both; }
+@keyframes fp-subir { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: none; } }
+.fp-fondo { animation: fp-aparecer 0.25s var(--fp-curva) both; }
+.fp-dialogo { animation: fp-subir 0.4s var(--fp-rebote) both; }
 
-/* Entrada suave de cada pantalla */
-@keyframes fp-entrar { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-main > router-outlet + * { animation: fp-entrar 0.25s ease-out both; }
+/* Menús, popovers y listas desplegables */
+@keyframes fp-desplegar { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
+.fp-desplegar { transform-origin: top right; animation: fp-desplegar 0.22s var(--fp-curva) both; }
+
+/* Avisos flotantes: entran deslizándose desde la derecha */
+@keyframes fp-aviso { from { opacity: 0; transform: translateX(24px) scale(0.96); } to { opacity: 1; transform: none; } }
+.fp-aviso { animation: fp-aviso 0.4s var(--fp-rebote) both; }
+
+/* Tarjetas y filas aparecen una tras otra */
+@keyframes fp-entrar { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.fp-escalonado > * { animation: fp-entrar 0.5s var(--fp-curva) both; }
+.fp-escalonado > :nth-child(1) { animation-delay: 0.03s; }
+.fp-escalonado > :nth-child(2) { animation-delay: 0.08s; }
+.fp-escalonado > :nth-child(3) { animation-delay: 0.13s; }
+.fp-escalonado > :nth-child(4) { animation-delay: 0.18s; }
+.fp-escalonado > :nth-child(5) { animation-delay: 0.23s; }
+.fp-escalonado > :nth-child(6) { animation-delay: 0.28s; }
+.fp-escalonado > :nth-child(7) { animation-delay: 0.32s; }
+.fp-escalonado > :nth-child(n+8) { animation-delay: 0.36s; }
+
+/* Cambio de pantalla: transición nativa del navegador (View Transitions); la cabecera y el pie se quedan quietos */
+::view-transition-old(root) { animation: 0.14s ease-in both fp-salir-pagina; }
+::view-transition-new(root) { animation: 0.4s var(--fp-curva) 0.1s both fp-entrar-pagina; }
+::view-transition-group(cabecera), ::view-transition-group(pie) { animation: none; }
+@keyframes fp-salir-pagina { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes fp-entrar-pagina { from { opacity: 0; transform: translateY(12px); } }
+/* Navegadores sin View Transitions: entrada simple de la pantalla */
+@supports not (view-transition-name: none) {
+  main > router-outlet + * { animation: fp-entrar 0.4s var(--fp-curva) both; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after, ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation-duration: 0.01ms !important; animation-delay: 0s !important; transition-duration: 0.01ms !important; }
 }
 
 .chicha-gradient { background: linear-gradient(90deg, #E6007E 0%, #FF6B00 50%, #FFE600 100%); }

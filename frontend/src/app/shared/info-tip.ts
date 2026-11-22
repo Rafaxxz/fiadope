@@ -11,7 +11,7 @@ import { Component, ElementRef, HostListener, input, signal } from '@angular/cor
         <span class="material-symbols-outlined text-lg">info</span>
       </button>
       @if (abierto()) {
-        <span class="absolute right-0 top-7 w-64 p-3 bg-surface-container-highest text-on-surface text-body-sm font-body-sm rounded-lg shadow-[2px_3px_0px_#1c1b1b] z-30 text-left normal-case tracking-normal font-normal">
+        <span class="fp-desplegar absolute right-0 top-7 w-64 p-3 bg-surface-container-highest text-on-surface text-body-sm font-body-sm rounded-lg shadow-[2px_3px_0px_#1c1b1b] z-30 text-left normal-case tracking-normal font-normal">
           <span class="block font-bold mb-1">{{ titulo() }}</span>
           <span class="block">{{ texto() }}</span>
         </span>

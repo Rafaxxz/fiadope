@@ -24,7 +24,7 @@ export class AvisoService {
   template: `
     <div class="fixed bottom-4 right-4 z-[70] flex flex-col gap-2 max-w-sm w-[calc(100%-2rem)]" aria-live="polite">
       @for (a of avisos.lista(); track a.id) {
-        <div class="flex items-start gap-2 p-3 rounded-lg shadow-[3px_4px_0px_#1c1b1b] font-body-sm text-body-sm"
+        <div class="fp-aviso flex items-start gap-2 p-3 rounded-lg shadow-[3px_4px_0px_#1c1b1b] font-body-sm text-body-sm"
              [class]="a.tipo === 'ok' ? 'bg-[#00C853] text-[#111111]' : a.tipo === 'error' ? 'bg-error text-on-error' : 'bg-inverse-surface text-inverse-on-surface'">
           <span class="material-symbols-outlined text-lg">{{ a.tipo === 'ok' ? 'check_circle' : a.tipo === 'error' ? 'error' : 'info' }}</span>
           <span class="flex-1 font-semibold">{{ a.texto }}</span>

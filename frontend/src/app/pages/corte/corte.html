@@ -29,7 +29,7 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+  <div class="fp-escalonado grid grid-cols-1 md:grid-cols-3 gap-space-md">
     <div class="relative overflow-hidden bg-surface-container-lowest rounded-xl p-space-md flex flex-col justify-between shadow-sm">
       <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-primary-container/10 rounded-full blur-xl pointer-events-none"></div>
       <div class="flex items-center justify-between pb-space-sm"><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wide">Total facturado en el corte</span><span class="material-symbols-outlined text-primary">receipt_long</span></div>
@@ -81,7 +81,7 @@
             <th class="whitespace-nowrap py-3 px-space-md text-right">Saldo al corte</th><th class="whitespace-nowrap py-3 px-space-md">Vence</th><th class="whitespace-nowrap py-3 px-space-md text-center">Estado</th><th class="whitespace-nowrap py-3 px-space-md text-right">Acciones</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-surface-container">
+        <tbody class="fp-escalonado divide-y divide-surface-container">
           @if (cargando()) { <tr><td colspan="7" class="py-10 text-center text-on-surface-variant">Calculando el corte…</td></tr> }
           @for (c of filas(); track c.idCliente; let i = $index) {
             @let e = estado(c);
